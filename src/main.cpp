@@ -1,5 +1,4 @@
-#include <iostream>
-#include <string>
+#include "ft_irc.hpp"
 
 int _err (std::string s)
 {
