@@ -1,13 +1,16 @@
-#ifndef UTILS_HPP
-# define UTILS_HPP
+#ifndef FT_IRC_HPP
+# define FT_IRC_HPP
 
 #include <string>
 #include <iostream>
-#include <sys/socket.h>
+#include <cstring>
 
+#define HOST "127.0.0.1"
 
 /*
  *		FT_IRC
+ *			1 - Criar sockets que usem TCP. (setSockets)
+ *
  *			Socket: permitem comunicacao entre computadores, usam FD para isso.
  *			        int socket(int domain, int type, int protocol);
  *				- Domain: define a familia de protocolos
@@ -24,14 +27,6 @@
  *				- optval: valor da opcao (int?)
  *				- optlen: tamanho de optval
  *
- *			Getaddrinfo: preenche a response (res) com flags, familia, tipo, protocolo,
- *						 tamanho do endereco, endereco, nome do host e proxima struct.
- *					int getaddrinfo(const char *node, const char *service,
- *							const struct addrinfo *hints, struct addrinfo **res);
- *				- Node: host
- *				- Service: port
- *				- Hints: criterios e restricoes para selecionar os sockets da response
- *				- Res: response com todos os sockets compativeis com os outros argumentos
  *
  *
  *		https://www.linuxhowtos.org/C_C++/socket.htm
