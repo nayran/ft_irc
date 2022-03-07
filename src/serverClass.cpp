@@ -4,11 +4,11 @@ Server::Server(std::string host, std::string port, std::string password)
 	: _host(host), _port(port), _password(password)
 {
 	std::cout << "host: " << _host << std::endl;
-	std::cout << "server port: " << _port << std::endl;
-	std::cout << "password: " << _password << std::endl;
-	std::cout << "socket: " << _socket << std::endl;
+	std::cout << "port: " << _port << std::endl;
+	std::cout << "pass: " << _password << std::endl;
+	std::cout << "sock: " << _socket << std::endl;
 	setSockets();
-	std::cout << "socket: " << _socket << std::endl;
+	std::cout << "sock: " << _socket << std::endl;
 
 };
 
@@ -17,7 +17,6 @@ Server::~Server()
 
 
 /* 
- *		https://www.man7.org/linux/man-pages/man3/getaddrinfo.3.html
  *		Getaddrinfo: preenche a response (res) com uma lista linkada de addrinfo.
  *					 addrinfo tem as variaveis: flags, familia, tipo, protocolo,
  *					 tamanho do endereco, endereco, nome do host e proxima struct.
@@ -27,6 +26,25 @@ Server::~Server()
  *			- Service: port
  *			- Hints: criterios e restricoes para selecionar os sockets da response
  *			- Res: response com todos os sockets compativeis com os outros argumentos
+ *		https://www.man7.org/linux/man-pages/man3/getaddrinfo.3.html
+ *
+ *		Socket: permitem comunicacao entre computadores, usam FD para isso.
+ *		    int socket(int domain, int type, int protocol);
+ *			- Domain: define a familia de protocolos
+ *			- Type: especifica a semantica da comunicacao
+ *			- Protocol: especifico para cada tipo de manipulacao de dados
+ *			Essas variaveis serao definidas pela resposta do getaddrinfo
+ *		https://www.linuxhowtos.org/C_C++/socket.htm
+ *		https://www.man7.org/linux/man-pages/man2/socket.2.html
+ *
+ *		Setsockopt: define opcoes do socket
+ *			int setsockopt(int sockfd, int level, int optname,
+ *					const void *optval, socklen_t optlen);
+ *			- Level: camada do protocolo. Para uso de opcoes que sao
+ *					 independentes do protocolo, usar SOL_SOCKET
+ *			- optname: opcao desejada
+ *			- optval: valor da opcao (int?)
+ *			- optlen: tamanho de optval
  */
 void Server::setSockets()
 {
