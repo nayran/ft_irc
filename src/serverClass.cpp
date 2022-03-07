@@ -3,18 +3,26 @@
 Server::Server(std::string host, std::string port, std::string password)
 	: _host(host), _port(port), _password(password)
 {
-	std::cout << "host: " << _host << std::endl;
-	std::cout << "port: " << _port << std::endl;
-	std::cout << "pass: " << _password << std::endl;
-	std::cout << "sock: " << _socket << std::endl;
 	setSockets();
-	std::cout << "sock: " << _socket << std::endl;
-
 };
 
 Server::~Server()
 {};
 
+/*
+ *		Listen: marca o socket como passivo, deixando apto a receber novas conexoes.
+ *				AI_PASSIVE ja faz isso?
+ *			int listen(int sockfd, int backlog);
+ */
+void	Server::start()
+{
+	//if (listen(_socket, MAX_CONNECTIONS) == -1)
+	//	throw std::runtime_error("error: could not listen");
+	std::cout << "host: " << _host << std::endl;
+	std::cout << "port: " << _port << std::endl;
+	std::cout << "pass: " << _password << std::endl;
+	std::cout << "sock: " << _socket << std::endl;
+}
 
 /* 
  *		Getaddrinfo: preenche a response (res) com uma lista linkada de addrinfo.
@@ -88,5 +96,6 @@ void Server::setSockets()
 	freeaddrinfo(res);
 	if (resaux == NULL)
 		throw std::runtime_error("error: could not bind");
+	if (listen(socketfd, MAX_CONNECTIONS) == -1)
 	_socket = socketfd;
 };

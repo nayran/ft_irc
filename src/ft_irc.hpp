@@ -6,10 +6,16 @@
 #include <cstring>
 
 #define HOST "127.0.0.1"
+#define MAX_CONNECTIONS 1024
 
 /*
  *		FT_IRC
- *			1 - Criar sockets que usem TCP. (setSockets)
+ *			1 - Criar sockets que usem TCP (setSockets)
+ *			2 - Fazer loop para deixar o server rodando
+ *
+ *			Client:
+ *				Comando nc (netcat), abre conexoes TCP e as ouve
+ *					nc 127.0.0.1 8080
  *
  */
 
