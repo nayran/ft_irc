@@ -32,12 +32,16 @@ void	Server::start()
 	while (true)
 	{
 		it = _fdvec.begin();
+		// poll parecido com select
 		if (poll(&(*it), _fdvec.size(), -1) == -1)
 			throw std::runtime_error("error: could not poll");
-		if (!_fdvec.empty())
+		for (; it != _fdvec.end(); it++)
 		{
-			std::cout << "greeting" << std::endl;
-			break;
+			int client = accept(_socket, nullptr, nullptr);
+			std::string buff;
+			std::getline (std::cin,buff);
+			//pollfd clientfd = {client, POLLIN, 0};
+			send(client, buff.c_str(), buff.length() + 1, 0);
 		}
 	}
 }
