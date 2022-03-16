@@ -13,6 +13,9 @@ Server::~Server()
  *		Listen: marca o socket como passivo, deixando apto a receber novas conexoes.
  *				AI_PASSIVE ja faz isso?
  *			int listen(int sockfd, int backlog);
+ *		Poll: 
+ *			int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+ *		
  */
 void	Server::start()
 {
@@ -22,6 +25,21 @@ void	Server::start()
 	std::cout << "port: " << _port << std::endl;
 	std::cout << "pass: " << _password << std::endl;
 	std::cout << "sock: " << _socket << std::endl;
+	// POLLIN: existe dados para serem lidos, mesm uso do FD_SET
+	pollfd fd = {_socket, POLLIN, 0};
+	_fdvec.push_back(fd);
+	std::vector<pollfd>::iterator	it;
+	while (true)
+	{
+		it = _fdvec.begin();
+		if (poll(&(*it), _fdvec.size(), -1) == -1)
+			throw std::runtime_error("error: could not poll");
+		if (!_fdvec.empty())
+		{
+			std::cout << "greeting" << std::endl;
+			break;
+		}
+	}
 }
 
 /* 
@@ -54,6 +72,7 @@ void	Server::start()
  *			- optval: valor da opcao (int?)
  *			- optlen: tamanho de optval
  */
+
 void Server::setSockets()
 {
 	addrinfo	hints;
@@ -83,11 +102,14 @@ void Server::setSockets()
 	// tentar amarrar(bind) ate ter sucesso. Se o socket falhar
 	// fecha-lo e tentar o proximo endereco
 	resaux = res;
+	//int enable = 1;
 	while(resaux != NULL)
 	{
 		socketfd = socket(resaux->ai_family, resaux->ai_socktype, resaux->ai_protocol);
 		if (socketfd == -1)
 			continue ;
+		//if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &enable, sizeof(enable)) == -1)
+			//throw std::runtime_error("error: could not set sock options");
 		if (bind(socketfd, resaux->ai_addr, resaux->ai_addrlen) == 0)
             break;
         close(socketfd);
@@ -97,5 +119,6 @@ void Server::setSockets()
 	if (resaux == NULL)
 		throw std::runtime_error("error: could not bind");
 	if (listen(socketfd, MAX_CONNECTIONS) == -1)
+		throw std::runtime_error("error: could not listen");
 	_socket = socketfd;
 };

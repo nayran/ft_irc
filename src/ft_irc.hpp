@@ -17,6 +17,7 @@
  *				Comando nc (netcat), abre conexoes TCP e as ouve
  *					nc 127.0.0.1 8080
  *
+ *		https://www.youtube.com/watch?app=desktop&v=dquxuXeZXgo
  */
 
 #endif
