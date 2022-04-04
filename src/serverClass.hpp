@@ -16,7 +16,7 @@ class Server
 		Server(std::string host, std::string port, std::string password);
 		~Server();
 		void			setSockets();
-		void			start();
+		void			init();
 
 	private:
 		std::string		_host;
