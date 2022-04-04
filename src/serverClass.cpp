@@ -10,38 +10,41 @@ Server::~Server()
 {};
 
 /*
- *		Listen: marca o socket como passivo, deixando apto a receber novas conexoes.
- *				AI_PASSIVE ja faz isso?
- *			int listen(int sockfd, int backlog);
- *		Poll: 
+ *		Poll: espera um fd da lista passada ficar pronto para I/O
+ *			  melhor que o select para manusear os fds
  *			int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+ *			timeout = -1 vai fazer com que espere um evento
  *		
  */
-void	Server::start()
+void	Server::init()
 {
-	//if (listen(_socket, MAX_CONNECTIONS) == -1)
-	//	throw std::runtime_error("error: could not listen");
-	std::cout << "host: " << _host << std::endl;
-	std::cout << "port: " << _port << std::endl;
-	std::cout << "pass: " << _password << std::endl;
-	std::cout << "sock: " << _socket << std::endl;
-	// POLLIN: existe dados para serem lidos, mesm uso do FD_SET
+	// POLLIN: existe dados para serem lidos, mesmo uso do FD_SET
 	pollfd fd = {_socket, POLLIN, 0};
+	if (fcntl(_socket, F_SETFL, O_NONBLOCK) == -1)
+	 	throw std::runtime_error("error: could not set fcntl flags");
+	// commands
 	_fdvec.push_back(fd);
 	std::vector<pollfd>::iterator	it;
+	std::cout << _host << ":" << _port << " " << _password << std::endl;
+	std::cout << "sock: " << _socket << std::endl;
 	while (true)
 	{
 		it = _fdvec.begin();
-		// poll parecido com select
 		if (poll(&(*it), _fdvec.size(), -1) == -1)
 			throw std::runtime_error("error: could not poll");
-		for (; it != _fdvec.end(); it++)
+		for	(; it != _fdvec.end(); it++)
 		{
-			int client = accept(_socket, nullptr, nullptr);
-			std::string buff;
-			std::getline (std::cin,buff);
-			//pollfd clientfd = {client, POLLIN, 0};
-			send(client, buff.c_str(), buff.length() + 1, 0);
+			if (POLLIN && it->fd == 0)
+				std::cout << "accept and add new fd to list" << std::endl;
+			else if (POLLIN)
+			{
+				char		message[100];
+				memset(message, '\0', sizeof(message));
+				recv(it->fd, message, sizeof(message), 0);
+				std::cout << "client ready, use read()" << std::endl;
+			}
+			else if (POLLOUT)
+				std::cout << "message to be sent, use write()" << std::endl;
 		}
 	}
 }
@@ -75,6 +78,10 @@ void	Server::start()
  *			- optname: opcao desejada
  *			- optval: valor da opcao (int?)
  *			- optlen: tamanho de optval
+ *
+ *		Listen: marca o socket como passivo, deixando apto a receber novas conexoes.
+ *				AI_PASSIVE ja faz isso? sim, mas o listen fica no aguardo de uma conexao
+ *			int listen(int sockfd, int backlog);
  */
 
 void Server::setSockets()
@@ -84,36 +91,37 @@ void Server::setSockets()
 	addrinfo	*resaux;
 	int			socketfd;
 
-    memset(&hints, 0, sizeof(hints));
 	// AI_PASSIVE para aceitar conexoes e ser amarravel (bind)
-	hints.ai_flags = AI_PASSIVE;
 	// AF_INET para IPv4
-	hints.ai_family = AF_INET;
 	// SOCK_STREAM para usar TCP, garantindo entrega dos pacotes
-	hints.ai_socktype = SOCK_STREAM;
 	// aceitar qualquer protocolo da familia definida acima
+	// todos os outros hints devem ser 0 ou nulo (memset)
+    memset(&hints, 0, sizeof(hints));
+	hints.ai_flags = AI_PASSIVE;
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = 0;
-	// todos os outros hints devem ser 0 ou nulo
-	hints.ai_addrlen = 0;
-	hints.ai_addr = NULL;
-	hints.ai_canonname = NULL;
-	hints.ai_next = NULL;
 	
 	// pegar informacoes do host para criar os sockets
 	if (getaddrinfo(_host.c_str(), _port.c_str(), &hints, &res) != 0)
 		throw std::runtime_error("error: could not get address info");
 	
 	// tentar amarrar(bind) ate ter sucesso. Se o socket falhar
-	// fecha-lo e tentar o proximo endereco
+	// fecha-lo e tentar o proximo endereco.
+	// O bind tende a falhar quando a opcao de reutilizar o socketfd nao eh setada
 	resaux = res;
-	//int enable = 1;
+	int enable = 1;
 	while(resaux != NULL)
 	{
 		socketfd = socket(resaux->ai_family, resaux->ai_socktype, resaux->ai_protocol);
 		if (socketfd == -1)
 			continue ;
-		//if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &enable, sizeof(enable)) == -1)
-			//throw std::runtime_error("error: could not set sock options");
+		if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
+		{
+			close(socketfd);
+			freeaddrinfo(res);
+			throw std::runtime_error("error: could not set socket options");
+		}
 		if (bind(socketfd, resaux->ai_addr, resaux->ai_addrlen) == 0)
             break;
         close(socketfd);

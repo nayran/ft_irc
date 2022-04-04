@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 		if (argc != 3)
 			throw std::runtime_error("usage: ./ircserv <port> <password>");
 		Server server(HOST, argv[1], argv[2]);
-		server.start();
+		server.init();
 	}
 	catch (const std::exception& e)
 	{
