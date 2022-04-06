@@ -2,12 +2,11 @@
 # define SERVERCLASS_HPP
 
 #include "ft_irc.hpp"
-#include <sys/socket.h>
+#include "usersClass.hpp"
 #include <netdb.h>
 #include <vector>
 #include <exception>
 #include <unistd.h>
-#include <fcntl.h>
 #include <poll.h>
 
 class Server
@@ -24,6 +23,7 @@ class Server
 		std::string		_password;
 		int				_socket;
 		std::vector<pollfd>	_fdvec;
+		std::list<User *>	_users;
 };
 
 #endif

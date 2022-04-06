@@ -2,9 +2,7 @@
 
 Server::Server(std::string host, std::string port, std::string password)
 	: _host(host), _port(port), _password(password)
-{
-	setSockets();
-};
+{ setSockets(); };
 
 Server::~Server()
 {};
@@ -14,19 +12,23 @@ Server::~Server()
  *			  melhor que o select para manusear os fds
  *			int poll(struct pollfd *fds, nfds_t nfds, int timeout);
  *			timeout = -1 vai fazer com que espere um evento
+ *		POLLIN: existe dados para serem lidos, mesmo uso do FD_SET
+ *		POLLOUT:
  *		
  */
 void	Server::init()
 {
-	// POLLIN: existe dados para serem lidos, mesmo uso do FD_SET
+	int cli;
+	sockaddr_storage		cli_addr;
+	socklen_t				sock_size;
+	
 	pollfd fd = {_socket, POLLIN, 0};
-	if (fcntl(_socket, F_SETFL, O_NONBLOCK) == -1)
-	 	throw std::runtime_error("error: could not set fcntl flags");
-	// commands
 	_fdvec.push_back(fd);
 	std::vector<pollfd>::iterator	it;
-	std::cout << _host << ":" << _port << " " << _password << std::endl;
-	std::cout << "sock: " << _socket << std::endl;
+	std::cout << "Server: " << _host << ":" << _port << std::endl;
+				
+	char buff[512];
+	
 	while (true)
 	{
 		it = _fdvec.begin();
@@ -34,17 +36,29 @@ void	Server::init()
 			throw std::runtime_error("error: could not poll");
 		for	(; it != _fdvec.end(); it++)
 		{
-			if (POLLIN && it->fd == 0)
-				std::cout << "accept and add new fd to list" << std::endl;
-			else if (POLLIN)
+			// if: aceita o client
+			// else: recebe a mensagem
+			if (it->fd == _socket)
 			{
-				char		message[100];
-				memset(message, '\0', sizeof(message));
-				recv(it->fd, message, sizeof(message), 0);
-				std::cout << "client ready, use read()" << std::endl;
+				cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
+				if (cli == -1)
+					throw std::runtime_error("error: could not accept client");
+				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
+				 	throw std::runtime_error("error: could not set fcntl flags");
+				_users.push_back(new User(cli));
+				
+
+				size_t nbytes;
+				if ((nbytes = recv(cli, buff, sizeof buff, 0)) <= 0)
+				{
+					throw std::runtime_error("error");
+				}
+				else
+				{
+					std::cout << buff;
+					memset(buff, 0, sizeof buff);
+				}
 			}
-			else if (POLLOUT)
-				std::cout << "message to be sent, use write()" << std::endl;
 		}
 	}
 }
@@ -132,5 +146,7 @@ void Server::setSockets()
 		throw std::runtime_error("error: could not bind");
 	if (listen(socketfd, MAX_CONNECTIONS) == -1)
 		throw std::runtime_error("error: could not listen");
+	if (fcntl(socketfd, F_SETFL, O_NONBLOCK) == -1)
+	 	throw std::runtime_error("error: could not set fcntl flags");
 	_socket = socketfd;
 };

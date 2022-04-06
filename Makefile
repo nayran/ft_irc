@@ -1,7 +1,8 @@
 NAME = ircserv
 
 SRCS = src/main.cpp 			\
-	   src/serverClass.cpp
+	   src/serverClass.cpp		\
+	   src/usersClass.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
