@@ -5,7 +5,9 @@ Server::Server(std::string host, std::string port, std::string password)
 { setSockets(); };
 
 Server::~Server()
-{};
+{
+	// delete users
+};
 
 /*
  *		Poll: espera um fd da lista passada ficar pronto para I/O
@@ -46,18 +48,19 @@ void	Server::init()
 				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
 				 	throw std::runtime_error("error: could not set fcntl flags");
 				_users.push_back(new User(cli));
-				
 
+			}
+			else
+			{
 				size_t nbytes;
 				if ((nbytes = recv(cli, buff, sizeof buff, 0)) <= 0)
-				{
 					throw std::runtime_error("error");
-				}
 				else
-				{
-					std::cout << buff;
+				{ 
+					std::cout << buff << std::flush;
 					memset(buff, 0, sizeof buff);
 				}
+			
 			}
 		}
 	}
