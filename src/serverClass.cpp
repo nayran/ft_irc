@@ -48,7 +48,6 @@ void	Server::init()
 				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
 				 	throw std::runtime_error("error: could not set fcntl flags");
 				_users.push_back(new User(cli));
-
 			}
 			else
 			{
