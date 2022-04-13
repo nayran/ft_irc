@@ -1,8 +1,16 @@
 #include "ft_irc.hpp"
 #include "serverClass.hpp"
+#include <csignal>
+
+void shutdown(int sig)
+{
+	std::cout << "Server shutting down..." << std::endl;
+	exit(sig);
+}
 
 int main(int argc, char **argv)
 {
+	signal (SIGINT, shutdown);
 	try
 	{
 		if (argc != 3)

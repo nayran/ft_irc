@@ -1,5 +1,6 @@
 #include "serverClass.hpp"
 
+
 Server::Server(std::string host, std::string port, std::string password)
 	: _host(host), _port(port), _password(password)
 { setSockets(); };
@@ -18,6 +19,7 @@ Server::~Server()
  *		POLLOUT:
  *		
  */
+
 void	Server::init()
 {
 	int cli;
@@ -29,7 +31,8 @@ void	Server::init()
 	std::vector<pollfd>::iterator	it;
 	std::cout << "Server: " << _host << ":" << _port << std::endl;
 				
-	char buff[512];
+	char *buff = new char [512];
+	memset(buff, '\0', 512);
 	
 	while (true)
 	{
@@ -51,18 +54,16 @@ void	Server::init()
 				_users.push_back(new User(cli));
 				pollfd cliaux = {cli, POLLIN, 0};
 				_fdvec.push_back(cliaux);
+				break;
 			}
 			else if (it->revents == POLLIN)
 			{
-				//std::cout << "POLLIN"; 
 				size_t nbytes;
-				if ((nbytes = recv(it->fd, buff, sizeof buff, 0)) <= 0)
+				if ((nbytes = recv(it->fd, buff, sizeof(buff), 0)) <= 0)
 					throw std::runtime_error("error");
 				else
-				{ 
-					std::cout << buff << std::flush;
-					memset(buff, 0, sizeof buff);
-				}
+					Command cmd(buff);
+				break;
 			}
 			else
 			{
@@ -71,6 +72,7 @@ void	Server::init()
 			it++;
 		}
 	}
+	delete[] buff;
 }
 
 /* 

@@ -2,11 +2,12 @@ NAME = ircserv
 
 SRCS = src/main.cpp 			\
 	   src/serverClass.cpp		\
-	   src/usersClass.cpp
+	   src/usersClass.cpp		\
+	   src/commandClass.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
-FLAGS = -Wall -Werror -Wextra -std=c++98
+FLAGS = -Wall -Werror -Wextra -std=c++98 -fsanitize=address
 
 all: $(NAME)
 

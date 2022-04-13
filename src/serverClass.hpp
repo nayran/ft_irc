@@ -3,6 +3,7 @@
 
 #include "ft_irc.hpp"
 #include "usersClass.hpp"
+#include "commandClass.hpp"
 #include <netdb.h>
 #include <vector>
 #include <exception>
