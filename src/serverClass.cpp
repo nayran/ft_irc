@@ -34,13 +34,14 @@ void	Server::init()
 	while (true)
 	{
 		it = _fdvec.begin();
+		unsigned long cont = 0;
 		if (poll(&(*it), _fdvec.size(), -1) == -1)
 			throw std::runtime_error("error: could not poll");
-		for	(; it != _fdvec.end(); it++)
+		for	(; cont < _fdvec.size() ; cont++)
 		{
 			// if: aceita o client
 			// else: recebe a mensagem
-			if (it->fd == _socket)
+			if (it->revents == POLLIN && it->fd == _socket)
 			{
 				cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
 				if (cli == -1)
@@ -48,19 +49,26 @@ void	Server::init()
 				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
 				 	throw std::runtime_error("error: could not set fcntl flags");
 				_users.push_back(new User(cli));
+				pollfd cliaux = {cli, POLLIN, 0};
+				_fdvec.push_back(cliaux);
 			}
-			else
+			else if (it->revents == POLLIN)
 			{
+				//std::cout << "POLLIN"; 
 				size_t nbytes;
-				if ((nbytes = recv(cli, buff, sizeof buff, 0)) <= 0)
+				if ((nbytes = recv(it->fd, buff, sizeof buff, 0)) <= 0)
 					throw std::runtime_error("error");
 				else
 				{ 
 					std::cout << buff << std::flush;
 					memset(buff, 0, sizeof buff);
 				}
-			
 			}
+			else
+			{
+				//std::cout << "POLLOUT";
+			}
+			it++;
 		}
 	}
 }
