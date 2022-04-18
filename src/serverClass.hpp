@@ -2,13 +2,13 @@
 # define SERVERCLASS_HPP
 
 #include "ft_irc.hpp"
-#include "usersClass.hpp"
-#include "commandClass.hpp"
 #include <netdb.h>
-#include <vector>
 #include <exception>
 #include <unistd.h>
 #include <poll.h>
+
+class User;
+class Command;
 
 class Server
 {
@@ -18,6 +18,7 @@ class Server
 		void			setSockets();
 		void			init();
 
+		User*		getUserBySocket(int socket);
 	private:
 		std::string		_host;
 		std::string		_port;
@@ -26,5 +27,8 @@ class Server
 		std::vector<pollfd>	_fdvec;
 		std::list<User *>	_users;
 };
+
+#include "usersClass.hpp"
+#include "commandClass.hpp"
 
 #endif

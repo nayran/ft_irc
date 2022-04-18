@@ -6,6 +6,8 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <fcntl.h>
+#include <vector>
+#include <list>
 
 #define HOST "127.0.0.1"
 #define MAX_CONNECTIONS 1024

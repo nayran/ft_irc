@@ -1,6 +1,5 @@
 #include "serverClass.hpp"
 
-
 Server::Server(std::string host, std::string port, std::string password)
 	: _host(host), _port(port), _password(password)
 { setSockets(); };
@@ -9,79 +8,6 @@ Server::~Server()
 {
 	// delete users
 };
-
-/*
- *		Poll: espera um fd da lista passada ficar pronto para I/O
- *			  melhor que o select para manusear os fds
- *			int poll(struct pollfd *fds, nfds_t nfds, int timeout);
- *			timeout = -1 vai fazer com que espere um evento
- *		POLLIN: existe dados para serem lidos, mesmo uso do FD_SET
- *		POLLOUT:
- *		
- */
-
-void	Server::init()
-{
-	int cli;
-	sockaddr_storage		cli_addr;
-	socklen_t				sock_size;
-	
-	pollfd fd = {_socket, POLLIN, 0};
-	_fdvec.push_back(fd);
-	std::vector<pollfd>::iterator	it;
-	std::cout << "Server: " << _host << ":" << _port << std::endl;
-				
-	char *buff = new char [512];
-	std::string buffaux;
-	
-	while (true)
-	{
-		it = _fdvec.begin();
-		unsigned long cont = 0;
-		if (poll(&(*it), _fdvec.size(), -1) == -1)
-			throw std::runtime_error("error: could not poll");
-		for	(; cont < _fdvec.size() ; cont++)
-		{
-			// if: aceita o client
-			// else: recebe a mensagem
-			if (it->revents == POLLIN && it->fd == _socket)
-			{
-				cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
-				if (cli == -1)
-					throw std::runtime_error("error: could not accept client");
-				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
-				 	throw std::runtime_error("error: could not set fcntl flags");
-				_users.push_back(new User(cli));
-				pollfd cliaux = {cli, POLLIN, 0};
-				_fdvec.push_back(cliaux);
-				break;
-			}
-			else if (it->revents == POLLIN)
-			{
-				memset(buff, '\0', 512);
-				size_t nbytes;
-				if ((nbytes = recv(it->fd, buff, sizeof(buff), 0)) <= 0)
-					throw std::runtime_error("error");
-				else
-				{
-					buffaux += buff;
-					if (buffaux.find("\n") != std::string::npos)
-					{
-						Command cmd(buffaux);
-						buffaux.clear();
-					}
-				}
-				break;
-			}
-			else
-			{
-				//std::cout << "POLLOUT";
-			}
-			it++;
-		}
-	}
-	delete[] buff;
-}
 
 /* 
  *		Getaddrinfo: preenche a response (res) com uma lista linkada de addrinfo.
@@ -170,3 +96,87 @@ void Server::setSockets()
 	 	throw std::runtime_error("error: could not set fcntl flags");
 	_socket = socketfd;
 };
+
+/*
+ *		Poll: espera um fd da lista passada ficar pronto para I/O
+ *			  melhor que o select para manusear os fds
+ *			int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+ *			timeout = -1 vai fazer com que espere um evento
+ *		POLLIN: existe dados para serem lidos, mesmo uso do FD_SET
+ *		POLLOUT:
+ *		
+ */
+
+void	Server::init()
+{
+	int cli;
+	sockaddr_storage		cli_addr;
+	socklen_t				sock_size;
+	
+	pollfd fd = {_socket, POLLIN, 0};
+	_fdvec.push_back(fd);
+	std::vector<pollfd>::iterator	it;
+	std::cout << "Server: " << _host << ":" << _port << std::endl;
+				
+	char *buff = new char [512];
+	std::string buffaux;
+	
+	while (true)
+	{
+		it = _fdvec.begin();
+		unsigned long cont = 0;
+		if (poll(&(*it), _fdvec.size(), -1) == -1)
+			throw std::runtime_error("error: could not poll");
+		for	(; cont < _fdvec.size() ; cont++)
+		{
+			// if: aceita o client
+			// else: recebe a mensagem
+			if (it->revents == POLLIN && it->fd == _socket)
+			{
+				cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
+				if (cli == -1)
+					throw std::runtime_error("error: could not accept client");
+				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
+				 	throw std::runtime_error("error: could not set fcntl flags");
+				_users.push_back(new User(cli));
+				pollfd cliaux = {cli, POLLIN, 0};
+				_fdvec.push_back(cliaux);
+				break;
+			}
+			else if (it->revents == POLLIN)
+			{
+				memset(buff, '\0', 512);
+				size_t nbytes;
+				if ((nbytes = recv(it->fd, buff, sizeof(buff), 0)) <= 0)
+					throw std::runtime_error("error");
+				else
+				{
+					buffaux += buff;
+					if (buffaux.find("\n") != std::string::npos)
+					{
+						Command cmd(buffaux, it->fd, this);
+						buffaux.clear();
+					}
+				}
+				break;
+			}
+			else
+			{
+				//std::cout << "POLLOUT";
+			}
+			it++;
+		}
+	}
+	delete[] buff;
+}
+
+User*		Server::getUserBySocket(int socket)
+{
+	std::list<User *>::iterator it = _users.begin();
+	while (it != _users.end())
+	{
+		if ((*it)->getSocket() == socket)
+			return (*it);
+	}
+	return (nullptr);
+}
