@@ -1,9 +1,12 @@
 #include "commandClass.hpp"
 
-Command::Command(char *buff)
+Command::Command(std::string buff)
 {
-	std::cout << buff << std::flush;
-	memset(buff, 0, sizeof(&buff));
+	static int x;
+	//std::cout << buff;
+	std::cout << x++ << buff << std::endl;
+
+	
 
 };
 

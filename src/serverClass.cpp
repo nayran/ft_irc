@@ -32,7 +32,7 @@ void	Server::init()
 	std::cout << "Server: " << _host << ":" << _port << std::endl;
 				
 	char *buff = new char [512];
-	memset(buff, '\0', 512);
+	std::string buffaux;
 	
 	while (true)
 	{
@@ -58,11 +58,19 @@ void	Server::init()
 			}
 			else if (it->revents == POLLIN)
 			{
+				memset(buff, '\0', 512);
 				size_t nbytes;
 				if ((nbytes = recv(it->fd, buff, sizeof(buff), 0)) <= 0)
 					throw std::runtime_error("error");
 				else
-					Command cmd(buff);
+				{
+					buffaux += buff;
+					if (buffaux.find("\n") != std::string::npos)
+					{
+						Command cmd(buffaux);
+						buffaux.clear();
+					}
+				}
 				break;
 			}
 			else

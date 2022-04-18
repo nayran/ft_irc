@@ -6,7 +6,7 @@
 class Command 
 {
 	public:
-		Command(char *buff);
+		Command(std::string buff);
 		~Command();
 
 	private:
