@@ -1,9 +1,9 @@
 #include "commandClass.hpp"
 
-Command::Command(std::string buff, int clisocket, Server *server)
+Command::Command(std::string buff, int clisocket, Server &server) : 
+	_server(server), _user(*server.getUserBySocket(clisocket))
 {
 	parse(buff);
-	_user = server->getUserBySocket(clisocket);
 	run();
 	
 	//std::vector<std::string>::iterator it;
@@ -23,15 +23,39 @@ void	Command::parse(std::string buff)
 	std::string val;
 
 	while (std::getline(iss, val, ' '))
-		_commands.push_back(val);
-	_command = *_commands.begin();
-	_commands.erase(_commands.begin());
+		_options.push_back(val);
+	_command = *_options.begin();
+	_options.erase(_options.begin());
 }
 
 void	Command::run()
 {
+	if (_command == "PASS")
+		std::cout << _server.getPassword() << std::endl;
 	if (_command == "NICK")
-		_user->setNick(*_commands.begin());
+	{
+		if (_options.size() != 1)
+			std::cout << _options.size() << "usage: /nick <newNick>" << std::endl;
+		else
+			_user.setNick(*_options.begin());
+	}
+	else if (!_user.getNick().empty())
+	{
+		if (_command == "USER")
+		{
+			std::cout << _command ;
+			for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+				std::cout << " " << *it;
+			std::cout << std::endl;
+		}
+		else
+		{
+			std::cout << _command ;
+			for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+				std::cout << " " << *it;
+			std::cout << std::endl;
+		}
+	}
 	else
-		std::cout << "after: " << _user->getNick() << std::endl;
+		std::cout << "Please, provide a nick to execute commands" << std::endl;
 }

@@ -154,7 +154,7 @@ void	Server::init()
 					buffaux += buff;
 					if (buffaux.find("\n") != std::string::npos)
 					{
-						Command cmd(buffaux, it->fd, this);
+						Command cmd(buffaux, it->fd, *this);
 						buffaux.clear();
 					}
 				}
@@ -179,4 +179,14 @@ User*		Server::getUserBySocket(int socket)
 			return (*it);
 	}
 	return (nullptr);
+}
+	
+/*int			Server::getSocket()
+{
+	return(_socket);
+}*/
+	
+std::string		Server::getPassword()
+{
+	return (_password);
 }

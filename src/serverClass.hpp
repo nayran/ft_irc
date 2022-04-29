@@ -17,8 +17,10 @@ class Server
 		~Server();
 		void			setSockets();
 		void			init();
+		User*			getUserBySocket(int socket);
+		//int				getSocket();
+		std::string		getPassword();
 
-		User*		getUserBySocket(int socket);
 	private:
 		std::string		_host;
 		std::string		_port;

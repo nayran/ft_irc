@@ -2,6 +2,7 @@
 # define USERSCLASS_HPP
 
 #include "ft_irc.hpp"
+#include <cctype>
 
 class Server;
 
@@ -16,7 +17,7 @@ class User
 		void				setNick(std::string);
 	private:
 		int					_clientfd;
-		std::string			nick;
+		std::string			_nick;
 
 };
 
