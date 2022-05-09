@@ -3,6 +3,7 @@
 
 #include "ft_irc.hpp"
 #include <sstream>
+#include <algorithm>
 
 class Server;
 class User;

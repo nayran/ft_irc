@@ -151,8 +151,12 @@ void	Server::init()
 					throw std::runtime_error("error");
 				else
 				{
-					buffaux += buff;
-					if (buffaux.find("\n") != std::string::npos)
+					if (buff[0] == 10)
+						buffaux += &buff[1];
+					else
+						buffaux += buff;
+					if (buffaux.find("\r") != std::string::npos ||
+						buffaux.find("\n") != std::string::npos)
 					{
 						Command cmd(buffaux, it->fd, *this);
 						buffaux.clear();
