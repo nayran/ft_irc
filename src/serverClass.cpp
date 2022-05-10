@@ -147,16 +147,12 @@ void	Server::init()
 			{
 				memset(buff, '\0', 512);
 				size_t nbytes;
-				if ((nbytes = recv(it->fd, buff, sizeof(buff), 0)) <= 0)
+				if ((nbytes = recv(it->fd, buff, 1, 0)) <= 0)
 					throw std::runtime_error("error");
 				else
 				{
-					if (buff[0] == 10)
-						buffaux += &buff[1];
-					else
-						buffaux += buff;
-					if (buffaux.find("\r") != std::string::npos ||
-						buffaux.find("\n") != std::string::npos)
+					buffaux += buff;
+					if (buffaux.find("\r\n") != std::string::npos)
 					{
 						Command cmd(buffaux, it->fd, *this);
 						buffaux.clear();

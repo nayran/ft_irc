@@ -41,3 +41,23 @@ std::string User::getNick()
 {
 	return (this->_nick);
 }
+		
+void	User::setUsername(std::string username)
+{
+	_username = username;
+}
+
+std::string User::getUsername()
+{
+	return (this->_username);
+}
+
+void	User::setRealname(std::string realname)
+{
+	_realname = realname;
+}
+
+std::string User::getRealname()
+{
+	return (this->_realname);
+}

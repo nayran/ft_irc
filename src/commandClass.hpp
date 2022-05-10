@@ -14,6 +14,10 @@ class Command
 		Command(std::string buff, int client, Server &server);
 		~Command();
 
+		void	ft_nick();
+		void	ft_user();
+		void	ft_exceptions();
+
 	private:
 		std::vector<std::string>	_options;
 		std::string					_command;
