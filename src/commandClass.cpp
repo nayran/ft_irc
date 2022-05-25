@@ -27,20 +27,24 @@ void	Command::parse(std::string buff)
 	_command = *_options.begin();
 	_options.erase(_options.begin());
 
-	std::cout << _command ;
-	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-		std::cout << " " << *it;
-	std::cout << std::endl;
+	// std::cout << "Command:" << _command ;
+	// for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+	// 	std::cout << " " << *it;
+	// std::cout << std::endl;
 }
 
 void	Command::run()
 {
-	if (_command == "PASS")
+	if (_command == "CAP")
+		response(&_user, "CAP * ACK multi-prefix");
+	else if (_command == "PASS")
 		std::cout << _server.getPassword() << std::endl;
 	else if (_command == "NICK")
 		ft_nick();
-	else if (_command == "USER")
-		ft_user();
+	//else if (_command == "USER")
+	//	ft_user();
+	else if (_command == "QUIT")
+		ft_quit();
 	else if (!_user.getNick().empty())
 	{
 		std::cout << _command ;
@@ -56,7 +60,7 @@ void	Command::ft_nick()
 {
 	if (_options.size() != 1 && !_user.getNick().empty())
 	{
-		std::cout << "usage: /NICK <newNick>" << std::endl;
+		response(&_user, "usage: /NICK <newNick>");
 		return ;
 	}
 	_user.setNick(*_options.begin());
@@ -73,7 +77,16 @@ void	Command::ft_user()
 	_user.setRealname(_options[3]);
 	std::string ack = ": USER " + _options[0] + " 0 * " + _options[3] + "\r\n";
 	send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
-	std::cout << ack << std::endl;
+}
+
+void	Command::ft_quit()
+{
+	std::string ack = "Quit: ";
+	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+		ack += *it;
+	response(&_user, ack);
+	response(&_user, "Server shutting down...");
+	exit(0);
 }
 
 void	Command::ft_exceptions()
@@ -84,4 +97,11 @@ void	Command::ft_exceptions()
 	std::cout << std::endl;
 	std::cout << "Please, provide a nick to execute commands" << std::endl;
 	send(_user.getSocket(), "test", 5, 0);
+}
+
+void response(User *user, std::string ack)
+{
+	std::cout << ack << std::endl;
+	ack += "\r\n";
+	send(user->getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
 }

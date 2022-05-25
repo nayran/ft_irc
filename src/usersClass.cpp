@@ -13,22 +13,23 @@ void	User::setNick(std::string newNick)
 { 
 	int i = -1;
 	if (newNick.length() < 4)
-	{
-		std::cout << "Nick must has 3 chars!" << std::endl;
-		//send(_user->getSocket(), "Nick must at least 3 chars!", 27, 0);
-	}
+		response(this, "newNick must has 3 chars!");
 	else
 	{
 		while (newNick.c_str()[++i + 1])
 		{
 			if (!isalnum(newNick.c_str()[i]))
 			{
-				std::cout << "Nick cannot have special chars!" << std::endl;
+				response(this, "newNick cannot have special chars!");
 				return ;
 			}
 		}
 		this->_nick = newNick;
-		std::cout << "New nick: " << _nick << std::endl;
+		//std::string ack = "new Nick: " + newNick;
+		static int num;
+		num++;
+		std::string ack = "00" + std::to_string(num) + " " + _nick + " :Welcome to Nayran's ft_irc " + _nick;
+		response(this, ack);
 	}
 }
 

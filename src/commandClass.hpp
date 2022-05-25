@@ -16,8 +16,11 @@ class Command
 
 		void	ft_nick();
 		void	ft_user();
+		void	ft_quit();
 		void	ft_exceptions();
 
+		void 	shutdown(int sig);
+		
 	private:
 		std::vector<std::string>	_options;
 		std::string					_command;
@@ -27,6 +30,8 @@ class Command
 		void						parse(std::string buff);
 		void						run();
 };
+
+void response(User *user, std::string ack);
 
 #include "serverClass.hpp"
 #include "usersClass.hpp"
