@@ -4,13 +4,14 @@ User::User(int client)
 {
 	this->_clientfd = client;
 	this->_nick = "";
+	this->_num = 0;
 };
 
-User::~User()
-{};
+User::~User(){};
 
-void	User::setNick(std::string newNick)
-{ 
+void User::setNick(std::string newNick)
+{
+	std::string ack;
 	int i = -1;
 	if (newNick.length() < 4)
 		response(this, "newNick must has 3 chars!");
@@ -21,19 +22,22 @@ void	User::setNick(std::string newNick)
 			if (!isalnum(newNick.c_str()[i]))
 			{
 				response(this, "newNick cannot have special chars!");
-				return ;
+				return;
 			}
 		}
+		if (_nick != "")
+			ack = _nick + " changed nick to " + newNick;
+		else
+			ack = "Welcome to Nayran's ft_irc " + newNick;
 		this->_nick = newNick;
-		//std::string ack = "new Nick: " + newNick;
 		static int num;
-		num++;
-		std::string ack = "00" + std::to_string(num) + " " + _nick + " :Welcome to Nayran's ft_irc " + _nick;
+		if (!this->_num)
+			_num = ++num;
 		response(this, ack);
 	}
 }
 
-int		User::getSocket()
+int User::getSocket()
 {
 	return (this->_clientfd);
 }
@@ -42,8 +46,8 @@ std::string User::getNick()
 {
 	return (this->_nick);
 }
-		
-void	User::setUsername(std::string username)
+
+void User::setUsername(std::string username)
 {
 	_username = username;
 }
@@ -53,12 +57,19 @@ std::string User::getUsername()
 	return (this->_username);
 }
 
-void	User::setRealname(std::string realname)
+void User::setRealname(std::string realname)
 {
 	_realname = realname;
 }
 
-std::string User::getRealname()
+std::string User::getNum()
 {
-	return (this->_realname);
+	std::string num = "00";
+	num += std::to_string(this->_num);
+	return (num);
 }
+
+// std::string User::getRealname()
+// {
+// 	return (this->_realname);
+// }
