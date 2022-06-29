@@ -15,12 +15,12 @@ Command::~Command(){};
 void Command::parse(std::string buff)
 {
 	buff.erase(std::remove(buff.begin(), buff.end(), '\n'), buff.end());
+	buff.erase(std::remove(buff.begin(), buff.end(), '\r'), buff.end());
 
 	// std::stringstream iss(buff);
 	// std::string val;
 
 	size_t pos = 0;
-
 	while ((pos = buff.find(' ')) != std::string::npos)
 	{
 		_options.push_back(buff.substr(0, pos));
@@ -34,6 +34,10 @@ void Command::parse(std::string buff)
 	// for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
 	// 	std::cout << " " << *it;
 	// std::cout << std::endl;
+	if (*_options.begin() == ":")
+		_options.erase(_options.begin());
+	else if ((*_options.begin())[0] == ':')
+		_options.begin()->erase(0, 1);
 }
 
 void Command::run()
@@ -46,14 +50,17 @@ void Command::run()
 		ft_nick();
 	else if (_command == "USER")
 		ft_user();
-	else if (_command == "QUIT")
-		ft_quit();
 	else if (!_user.getNick().empty())
 	{
-		std::cout << "new: " << _command;
-		for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-			std::cout << " " << *it;
-		std::cout << std::endl;
+		if (_command == "QUIT")
+			ft_quit();
+		else
+		{
+			std::cout << "new: " << _command;
+			for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+				std::cout << " " << *it;
+			std::cout << std::endl;
+		}
 	}
 	else
 		ft_exceptions();
@@ -62,28 +69,19 @@ void Command::run()
 void Command::ft_nick()
 {
 	if (_options.size() != 1 && !_user.getNick().empty())
-	{
-		response(&_user, "usage: /NICK <newNick>");
-		return;
-	}
+		return response(&_user, "usage: /NICK <newNick>");
 	_user.setNick(*_options.begin());
 }
 
 void Command::ft_user()
 {
-	if (_options.size() < 4 || _options.size() > 4)
-	{
-		response(&_user, "usage: /USER <username> <hostname> <servername> <realname>");
-		return;
-	}
+	if (_user.getNick().empty())
+		response(&_user, "Please, provide a nick to execute commands");
+	if (_options.size() != 4)
+		return response(&_user, "usage: /USER <username> <hostname> <servername> <realname>");
 	if (!_user.getUsername().empty())
-	{
-		response(&_user, "USER is already registered");
-		return;
-	}
+		return response(&_user, "USER is already registered");
 	_user.setUsername(_options[0]);
-	// if (_options[3][0] == ':')
-	// _options[3].erase(0, 1);
 	_user.setRealname(_options[3]);
 	std::string ack = "USER " + _options[0] + " 0 * " + _options[3];
 	response(&_user, ack);
@@ -94,7 +92,8 @@ void Command::ft_quit()
 {
 	std::string ack = "Quit: ";
 	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-		ack += *it;
+		ack += *it + " ";
+	std::cout << ack << std::endl;
 	response(&_user, ack);
 	// response(&_user, "Server shutting down...");
 	// exit(0);
@@ -107,8 +106,9 @@ void Command::ft_exceptions()
 	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
 		std::cout << " " << *it;
 	std::cout << std::endl;
-	std::cout << "Please, provide a nick to execute commands" << std::endl;
-	send(_user.getSocket(), "test", 5, 0);
+	std::string ack = "Please, provide a nick to execute commands";
+	std::cout << ack << std::endl;
+	response(&_user, ack);
 }
 
 void response(User *user, std::string ack)

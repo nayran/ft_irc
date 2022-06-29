@@ -14,27 +14,21 @@ void User::setNick(std::string newNick)
 	std::string ack;
 	int i = -1;
 	if (newNick.length() < 4)
-		response(this, "newNick must has 3 chars!");
-	else
+		return response(this, "newNick must has 3 chars!");
+	while (newNick.c_str()[++i + 1])
 	{
-		while (newNick.c_str()[++i + 1])
-		{
-			if (!isalnum(newNick.c_str()[i]))
-			{
-				response(this, "newNick cannot have special chars!");
-				return;
-			}
-		}
-		if (_nick != "")
-			ack = _nick + " changed nick to " + newNick;
-		else
-			ack = "Welcome to Nayran's ft_irc " + newNick;
-		this->_nick = newNick;
-		static int num;
-		if (!this->_num)
-			_num = ++num;
-		response(this, ack);
+		if (!isalnum(newNick.c_str()[i]))
+			return response(this, "newNick cannot have special chars!");
 	}
+	if (_nick != "")
+		ack = _nick + " changed nick to " + newNick;
+	else
+		ack = "Welcome to Nayran's ft_irc " + newNick;
+	this->_nick = newNick;
+	static int num;
+	if (!this->_num)
+		_num = ++num;
+	response(this, ack);
 }
 
 int User::getSocket()
