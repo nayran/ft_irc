@@ -182,12 +182,42 @@ User *Server::getUserBySocket(int socket)
 	return (nullptr);
 }
 
-/*int			Server::getSocket()
+int Server::getSocket()
 {
-	return(_socket);
-}*/
+	return (_socket);
+}
 
 std::string Server::getPassword()
 {
 	return (_password);
+}
+
+std::list<User *> Server::getUsers()
+{
+	return (_users);
+}
+
+void Server::sendMessage(std::string ack)
+{
+	// for (std::list<User *>::iterator it = getUsers().begin();
+	//  it != getUsers().end(); ++it)
+	// {
+	// response(*it, ack);
+	// }
+	std::cout << "SERVER MSG: " << ack << std::endl;
+}
+
+void Server::deleteUser(User *user)
+{
+	std::list<User *>::iterator it;
+	for (it = _users.begin(); it != _users.end(); ++it)
+	{
+		if ((*it)->getSocket() == user->getSocket())
+		{
+			close(user->getSocket());
+			delete *it;
+			_users.erase(it);
+			return;
+		}
+	}
 }

@@ -58,10 +58,13 @@ void Command::run()
 				ft_quit();
 			else
 			{
-				std::cout << "new: " << _command;
-				for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-					std::cout << " " << *it;
-				std::cout << std::endl;
+				std::string ack = "Unknown command: " + _command;
+				std::cout << ack << std::endl;
+				response(&_user, ack);
+				// std::cout << "new: " << _command;
+				// for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+				// 	std::cout << " " << *it;
+				// std::cout << std::endl;
 			}
 		}
 		else
@@ -69,14 +72,15 @@ void Command::run()
 	}
 	else
 		ft_passexcept();
+	// _server.sendMessage("teste");
 }
 
 void Command::ft_pass()
 {
 	if (_options.size() != 1)
 		return response(&_user, "usage: /PASS <password>");
-	// if (!_server.getPassword().empty())
-	// 	return response(&_user, "Server already has a password");
+	if (_user.isAuth())
+		return response(&_user, "You are already registered");
 	if (_options[0] == _server.getPassword())
 		_user.auth();
 	else
@@ -107,22 +111,23 @@ void Command::ft_user()
 
 void Command::ft_quit()
 {
-	std::string ack = "Quit: ";
+	std::string ack = "Quit";
+	if (_options.size() > 0)
+		ack += ": ";
 	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
 		ack += *it + " ";
 	std::cout << ack << std::endl;
 	response(&_user, ack);
-	// response(&_user, "Server shutting down...");
-	// exit(0);
+	_server.deleteUser(&this->_user);
 }
 
 void Command::ft_userexcept()
 {
-	std::cout << "USER EXCEPTIONS" << std::endl;
-	std::cout << _command;
-	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-		std::cout << " " << *it;
-	std::cout << std::endl;
+	// std::cout << "USER EXCEPTIONS" << std::endl;
+	// std::cout << _command;
+	// for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+	// 	std::cout << " " << *it;
+	// std::cout << std::endl;
 	std::string ack = "Please, provide a nick to execute commands - usage: /NICK <newNick>";
 	std::cout << ack << std::endl;
 	response(&_user, ack);
@@ -130,11 +135,11 @@ void Command::ft_userexcept()
 
 void Command::ft_passexcept()
 {
-	std::cout << "PASS EXCEPTIONS" << std::endl;
-	std::cout << _command;
-	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-		std::cout << " " << *it;
-	std::cout << std::endl;
+	// std::cout << "PASS EXCEPTIONS" << std::endl;
+	// std::cout << _command;
+	// for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+	// 	std::cout << " " << *it;
+	// std::cout << std::endl;
 	std::string ack = "Please, provide a password to execute commands - usage: /PASS <password>";
 	std::cout << ack << std::endl;
 	response(&_user, ack);
