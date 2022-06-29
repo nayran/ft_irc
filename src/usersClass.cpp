@@ -4,7 +4,9 @@ User::User(int client)
 {
 	this->_clientfd = client;
 	this->_nick = "";
-	this->_num = 0;
+	static int num;
+	_num = ++num;
+	this->_auth = false;
 };
 
 User::~User(){};
@@ -22,12 +24,7 @@ void User::setNick(std::string newNick)
 	}
 	if (_nick != "")
 		ack = _nick + " changed nick to " + newNick;
-	else
-		ack = "Welcome to Nayran's ft_irc " + newNick;
 	this->_nick = newNick;
-	static int num;
-	if (!this->_num)
-		_num = ++num;
 	response(this, ack);
 }
 
@@ -67,3 +64,12 @@ std::string User::getNum()
 // {
 // 	return (this->_realname);
 // }
+bool User::isAuth()
+{
+	return (this->_auth);
+}
+
+void User::auth()
+{
+	this->_auth = true;
+}

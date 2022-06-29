@@ -45,25 +45,44 @@ void Command::run()
 	if (_command == "CAP")
 		response(&_user, "CAP * ACK multi-prefix");
 	else if (_command == "PASS")
-		std::cout << _server.getPassword() << std::endl;
-	else if (_command == "NICK")
-		ft_nick();
-	else if (_command == "USER")
-		ft_user();
-	else if (!_user.getNick().empty())
+		ft_pass();
+	else if (_user.isAuth())
 	{
-		if (_command == "QUIT")
-			ft_quit();
-		else
+		if (_command == "NICK")
+			ft_nick();
+		else if (!_user.getNick().empty())
 		{
-			std::cout << "new: " << _command;
-			for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-				std::cout << " " << *it;
-			std::cout << std::endl;
+			if (_command == "USER")
+				ft_user();
+			else if (_command == "QUIT")
+				ft_quit();
+			else
+			{
+				std::cout << "new: " << _command;
+				for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+					std::cout << " " << *it;
+				std::cout << std::endl;
+			}
 		}
+		else
+			ft_userexcept();
 	}
 	else
-		ft_exceptions();
+		ft_passexcept();
+}
+
+void Command::ft_pass()
+{
+	if (_options.size() != 1)
+		return response(&_user, "usage: /PASS <password>");
+	// if (!_server.getPassword().empty())
+	// 	return response(&_user, "Server already has a password");
+	if (_options[0] == _server.getPassword())
+		_user.auth();
+	else
+		return response(&_user, "Wrong password");
+	std::string ack = "Welcome to Nayran's ft_irc " + _user.getNick();
+	response(&_user, ack);
 }
 
 void Command::ft_nick()
@@ -75,8 +94,6 @@ void Command::ft_nick()
 
 void Command::ft_user()
 {
-	if (_user.getNick().empty())
-		response(&_user, "Please, provide a nick to execute commands");
 	if (_options.size() != 4)
 		return response(&_user, "usage: /USER <username> <hostname> <servername> <realname>");
 	if (!_user.getUsername().empty())
@@ -85,7 +102,7 @@ void Command::ft_user()
 	_user.setRealname(_options[3]);
 	std::string ack = "USER " + _options[0] + " 0 * " + _options[3];
 	response(&_user, ack);
-	send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
+	// send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
 }
 
 void Command::ft_quit()
@@ -99,21 +116,37 @@ void Command::ft_quit()
 	// exit(0);
 }
 
-void Command::ft_exceptions()
+void Command::ft_userexcept()
 {
-	std::cout << "EXCEPTIONS" << std::endl;
+	std::cout << "USER EXCEPTIONS" << std::endl;
 	std::cout << _command;
 	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
 		std::cout << " " << *it;
 	std::cout << std::endl;
-	std::string ack = "Please, provide a nick to execute commands";
+	std::string ack = "Please, provide a nick to execute commands - usage: /NICK <newNick>";
+	std::cout << ack << std::endl;
+	response(&_user, ack);
+}
+
+void Command::ft_passexcept()
+{
+	std::cout << "PASS EXCEPTIONS" << std::endl;
+	std::cout << _command;
+	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+		std::cout << " " << *it;
+	std::cout << std::endl;
+	std::string ack = "Please, provide a password to execute commands - usage: /PASS <password>";
 	std::cout << ack << std::endl;
 	response(&_user, ack);
 }
 
 void response(User *user, std::string ack)
 {
-	std::string res = user->getNum() + " " + user->getNick() + " :" + ack + "\r\n";
+	std::string res;
+	if (!user->getNick().empty())
+		res = user->getNum() + " " + user->getNick() + " :" + ack + "\r\n";
+	else
+		res = user->getNum() + " nick :" + ack + "\r\n";
 	// std::cout << res << std::endl;
 	send(user->getSocket(), res.c_str(), strlen(res.c_str()), 0);
 }
