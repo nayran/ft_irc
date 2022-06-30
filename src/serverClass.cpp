@@ -93,8 +93,6 @@ void Server::setSockets()
 		throw std::runtime_error("error: could not bind");
 	if (listen(socketfd, MAX_CONNECTIONS) == -1)
 		throw std::runtime_error("error: could not listen");
-	if (fcntl(socketfd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("error: could not set fcntl flags");
 	_socket = socketfd;
 };
 
@@ -110,66 +108,142 @@ void Server::setSockets()
 
 void Server::init()
 {
-	int cli;
-	sockaddr_storage cli_addr;
-	socklen_t sock_size;
 
 	pollfd fd = {_socket, POLLIN, 0};
+	if (fcntl(_socket, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("error: could not set fcntl flags");
 	_fdvec.push_back(fd);
-	std::vector<pollfd>::iterator it;
+	std::vector<pollfd>::iterator itfd;
 	std::cout << "Server: " << _host << ":" << _port << std::endl;
+	while (true)
+	{
+		itfd = _fdvec.begin();
+		if (poll(&(*itfd), _fdvec.size(), -1) == -1)
+			throw std::runtime_error("error: could not poll");
+		this->init2();
+	}
+}
 
+void Server::init2()
+{
+	pollfd thisPollFd;
 	char *buff = new char[512];
 	std::string buffaux;
 
-	while (true)
+	for (std::vector<pollfd>::iterator it = _fdvec.begin(); it != _fdvec.end(); it++)
 	{
-		it = _fdvec.begin();
-		unsigned long cont = 0;
-		if (poll(&(*it), _fdvec.size(), -1) == -1)
-			throw std::runtime_error("error: could not poll");
-		for (; cont < _fdvec.size(); cont++)
+		thisPollFd = *it;
+		if ((thisPollFd.revents & POLLIN) == POLLIN)
 		{
-			// if: aceita o client
-			// else: recebe a mensagem
-			if (it->revents == POLLIN && it->fd == _socket)
+			if (thisPollFd.fd == _socket)
 			{
-				cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
-				if (cli == -1)
-					throw std::runtime_error("error: could not accept client");
-				if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
-					throw std::runtime_error("error: could not set fcntl flags");
-				_users.push_back(new User(cli));
-				pollfd cliaux = {cli, POLLIN, 0};
-				_fdvec.push_back(cliaux);
+				this->acceptUser();
 				break;
 			}
-			else if (it->revents == POLLIN)
+			else
 			{
 				memset(buff, '\0', 512);
 				size_t nbytes;
-				if ((nbytes = recv(it->fd, buff, 1, 0)) <= 0)
+				if ((nbytes = recv(thisPollFd.fd, buff, 1, 0)) <= 0)
 					throw std::runtime_error("error");
 				else
 				{
 					buffaux += buff;
 					if (buffaux.find("\r\n") != std::string::npos)
 					{
-						Command cmd(buffaux, it->fd, *this);
+						Command cmd(buffaux, thisPollFd.fd, *this);
 						buffaux.clear();
 					}
 				}
-				break;
 			}
-			else
-			{
-				// std::cout << "POLLOUT";
-			}
-			it++;
+		}
+		if ((thisPollFd.revents & POLLHUP) == POLLHUP)
+		{
+			break;
 		}
 	}
-	delete[] buff;
 }
+
+int Server::acceptUser()
+{
+	int client_d;
+	sockaddr_in client_addr;
+	socklen_t s_size;
+
+	s_size = sizeof(client_addr);
+	client_d = accept(_socket, (sockaddr *)&client_addr, &s_size);
+	if (client_d == -1)
+		throw std::runtime_error("clientd");
+	pollfd newPollFd = {client_d, POLLIN, 0};
+	_fdvec.push_back(newPollFd);
+	if (fcntl(client_d, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("fcntl");
+	User *newUser = new User(client_d);
+	_users.push_back(newUser);
+	std::cout << "New client: " << newUser->getSocket() << std::endl;
+	return client_d;
+}
+
+int Server::receiveMessage()
+{
+	// ssize_t byteRecv;
+	// char message[100];
+	return 0;
+}
+
+// int cli;
+// sockaddr_in cli_addr;
+// socklen_t sock_size = sizeof(cli_addr);
+
+// std::cout << "Server: " << _host << ":" << _port << std::endl;
+// char *buff = new char[512];
+// std::string buffaux;
+
+//
+// 			// if: aceita o client
+// 			// else: recebe a mensagem
+// 			if (thisPollFd.revents == POLLIN)
+// 			{
+// 				// if: aceita novo usuario
+// 				// else: recebe mensagem pro usuario
+// 				if (thisPollFd.fd == _socket)
+// 				{
+// 					cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
+// 					if (cli == -1)
+// 						throw std::runtime_error("error: could not accept client");
+// 					pollfd cliaux = {cli, POLLIN, 0};
+// 					_fdvec.push_back(cliaux);
+// 					if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
+// 						throw std::runtime_error("error: could not set fcntl flags");
+// 					_users.push_back(new User(cli));
+// 					break;
+// 				}
+// 				else
+// 				{
+// 					memset(buff, '\0', 512);
+// 					size_t nbytes;
+// 					if ((nbytes = recv(thisPollFd.fd, buff, 1, 0)) <= 0)
+// 						throw std::runtime_error("error");
+// 					else
+// 					{
+// 						buffaux += buff;
+// 						if (buffaux.find("\r\n") != std::string::npos)
+// 						{
+// 							Command cmd(buffaux, thisPollFd.fd, *this);
+// 							buffaux.clear();
+// 						}
+// 					}
+// 				}
+// 			}
+// 			else
+// 			{
+// 				// std::cout << "POLLOUT";
+// 			}
+// 			// it++;
+// 		}
+// 	}
+// 	delete[] buff;
+// }
 
 User *Server::getUserBySocket(int socket)
 {

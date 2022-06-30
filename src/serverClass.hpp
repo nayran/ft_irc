@@ -17,6 +17,9 @@ public:
 	~Server();
 	void setSockets();
 	void init();
+	void init2();
+	int acceptUser();
+	int receiveMessage();
 	User *getUserBySocket(int socket);
 	int getSocket();
 	std::string getPassword();
