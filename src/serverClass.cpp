@@ -127,8 +127,6 @@ void Server::init()
 void Server::init2()
 {
 	pollfd thisPollFd;
-	char *buff = new char[512];
-	std::string buffaux;
 
 	for (std::vector<pollfd>::iterator it = _fdvec.begin(); it != _fdvec.end(); it++)
 	{
@@ -142,19 +140,7 @@ void Server::init2()
 			}
 			else
 			{
-				memset(buff, '\0', 512);
-				size_t nbytes;
-				if ((nbytes = recv(thisPollFd.fd, buff, 1, 0)) <= 0)
-					throw std::runtime_error("error");
-				else
-				{
-					buffaux += buff;
-					if (buffaux.find("\r\n") != std::string::npos)
-					{
-						Command cmd(buffaux, thisPollFd.fd, *this);
-						buffaux.clear();
-					}
-				}
+				receiveMessage(thisPollFd.fd);
 			}
 		}
 		if ((thisPollFd.revents & POLLHUP) == POLLHUP)
@@ -162,6 +148,32 @@ void Server::init2()
 			break;
 		}
 	}
+}
+
+int Server::receiveMessage(int clifd)
+{
+	char *buff = new char[512];
+	std::string buffaux;
+	memset(buff, '\0', 512);
+	size_t nbytes;
+	while (buffaux.find("\r\n"))
+	{
+		if ((nbytes = recv(clifd, buff, 1, 0)) <= 0)
+			throw std::runtime_error("error");
+		else
+		{
+			// std::cout << "buff: " << buff << std::endl;
+			buffaux += buff;
+			if (buffaux.find("\r\n") != std::string::npos)
+			{
+				Command cmd(buffaux, clifd, *this);
+				break;
+			}
+		}
+	}
+	buffaux.clear();
+	// delete buff;
+	return 0;
 }
 
 int Server::acceptUser()
@@ -182,13 +194,6 @@ int Server::acceptUser()
 	_users.push_back(newUser);
 	std::cout << "New client: " << newUser->getSocket() << std::endl;
 	return client_d;
-}
-
-int Server::receiveMessage()
-{
-	// ssize_t byteRecv;
-	// char message[100];
-	return 0;
 }
 
 // int cli;
@@ -252,6 +257,7 @@ User *Server::getUserBySocket(int socket)
 	{
 		if ((*it)->getSocket() == socket)
 			return (*it);
+		it++;
 	}
 	return (nullptr);
 }

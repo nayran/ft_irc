@@ -19,7 +19,7 @@ public:
 	void init();
 	void init2();
 	int acceptUser();
-	int receiveMessage();
+	int receiveMessage(int clifd);
 	User *getUserBySocket(int socket);
 	int getSocket();
 	std::string getPassword();
