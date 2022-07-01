@@ -158,8 +158,8 @@ int Server::receiveMessage(int clifd)
 	size_t nbytes;
 	while (buffaux.find("\r\n"))
 	{
-		if ((nbytes = recv(clifd, buff, 1, 0)) <= 0)
-			throw std::runtime_error("error");
+		if ((nbytes = recv(clifd, buff, 1, 0)) < 0)
+			throw std::runtime_error("RECV ERROR");
 		else
 		{
 			// std::cout << "buff: " << buff << std::endl;
@@ -172,7 +172,7 @@ int Server::receiveMessage(int clifd)
 		}
 	}
 	buffaux.clear();
-	// delete buff;
+	delete[] buff;
 	return 0;
 }
 
@@ -195,60 +195,6 @@ int Server::acceptUser()
 	std::cout << "New client: " << newUser->getSocket() << std::endl;
 	return client_d;
 }
-
-// int cli;
-// sockaddr_in cli_addr;
-// socklen_t sock_size = sizeof(cli_addr);
-
-// std::cout << "Server: " << _host << ":" << _port << std::endl;
-// char *buff = new char[512];
-// std::string buffaux;
-
-//
-// 			// if: aceita o client
-// 			// else: recebe a mensagem
-// 			if (thisPollFd.revents == POLLIN)
-// 			{
-// 				// if: aceita novo usuario
-// 				// else: recebe mensagem pro usuario
-// 				if (thisPollFd.fd == _socket)
-// 				{
-// 					cli = accept(_socket, (sockaddr *)&cli_addr, &sock_size);
-// 					if (cli == -1)
-// 						throw std::runtime_error("error: could not accept client");
-// 					pollfd cliaux = {cli, POLLIN, 0};
-// 					_fdvec.push_back(cliaux);
-// 					if (fcntl(cli, F_SETFL, O_NONBLOCK) == -1)
-// 						throw std::runtime_error("error: could not set fcntl flags");
-// 					_users.push_back(new User(cli));
-// 					break;
-// 				}
-// 				else
-// 				{
-// 					memset(buff, '\0', 512);
-// 					size_t nbytes;
-// 					if ((nbytes = recv(thisPollFd.fd, buff, 1, 0)) <= 0)
-// 						throw std::runtime_error("error");
-// 					else
-// 					{
-// 						buffaux += buff;
-// 						if (buffaux.find("\r\n") != std::string::npos)
-// 						{
-// 							Command cmd(buffaux, thisPollFd.fd, *this);
-// 							buffaux.clear();
-// 						}
-// 					}
-// 				}
-// 			}
-// 			else
-// 			{
-// 				// std::cout << "POLLOUT";
-// 			}
-// 			// it++;
-// 		}
-// 	}
-// 	delete[] buff;
-// }
 
 User *Server::getUserBySocket(int socket)
 {
@@ -279,12 +225,12 @@ std::list<User *> Server::getUsers()
 
 void Server::sendMessage(std::string ack)
 {
-	// for (std::list<User *>::iterator it = getUsers().begin();
-	//  it != getUsers().end(); ++it)
-	// {
-	// response(*it, ack);
-	// }
-	std::cout << "SERVER MSG: " << ack << std::endl;
+	for (std::list<User *>::iterator it = _users.begin();
+		 it != _users.end(); ++it)
+	{
+		response(*it, ack);
+	}
+	// std::cout << "SERVER MSG: " << ack << std::endl;
 }
 
 void Server::deleteUser(User *user)

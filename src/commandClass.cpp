@@ -12,13 +12,16 @@ Command::Command(std::string buff, int clisocket, Server &server) : _server(serv
 
 Command::~Command(){};
 
+void ft_flush(std::string s)
+{
+	std::cout << "flush:" << s << "-" << std::endl
+			  << std::flush;
+}
+
 void Command::parse(std::string buff)
 {
 	buff.erase(std::remove(buff.begin(), buff.end(), '\n'), buff.end());
 	buff.erase(std::remove(buff.begin(), buff.end(), '\r'), buff.end());
-
-	// std::stringstream iss(buff);
-	// std::string val;
 
 	size_t pos = 0;
 	while ((pos = buff.find(' ')) != std::string::npos)
@@ -30,14 +33,12 @@ void Command::parse(std::string buff)
 	_command = *_options.begin();
 	_options.erase(_options.begin());
 
-	// std::cout << "Command:" << _command ;
-	// for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-	// 	std::cout << " " << *it;
-	// std::cout << std::endl;
-	if (*_options.begin() == ":")
-		_options.erase(_options.begin());
-	else if ((*_options.begin())[0] == ':')
+	if ((*_options.begin())[0] == ':')
+	{
 		_options.begin()->erase(0, 1);
+		if (*_options.begin() == "")
+			_options.erase(_options.begin());
+	}
 }
 
 void Command::run()
@@ -55,7 +56,9 @@ void Command::run()
 			if (_command == "USER")
 				ft_user();
 			else if (_command == "QUIT")
+			{
 				ft_quit();
+			}
 			else
 			{
 				std::string ack = "Unknown command: " + _command;
@@ -91,8 +94,28 @@ void Command::ft_pass()
 
 void Command::ft_nick()
 {
+	std::string newNick = _options[0];
 	if (_options.size() != 1 && !_user.getNick().empty())
 		return response(&_user, "usage: /NICK <newNick>");
+	if (newNick.length() < 4)
+		return response(&_user, "newNick must has 3 chars!");
+	int i = -1;
+	while (newNick.c_str()[++i + 1])
+	{
+		if (!isalnum(newNick.c_str()[i]))
+			return response(&_user, "newNick cannot have special chars!");
+	}
+	std::list<User *> users = _server.getUsers();
+	std::list<User *>::iterator it = users.begin();
+	for (; it != users.end(); ++it)
+	{
+		if ((*it)->getNick() == newNick)
+			return response(&_user, "Nick already in use!");
+	}
+	if (_user.getNick() != "")
+		_server.sendMessage(_user.getNick() + " changed nick to " + newNick);
+	else
+		_server.sendMessage(newNick + " joined the server!");
 	_user.setNick(*_options.begin());
 }
 
@@ -104,20 +127,22 @@ void Command::ft_user()
 		return response(&_user, "USER is already registered");
 	_user.setUsername(_options[0]);
 	_user.setRealname(_options[3]);
-	std::string ack = "USER " + _options[0] + " 0 * " + _options[3];
-	response(&_user, ack);
+	// std::string ack = "USER " + _options[0] + " 0 * " + _options[3];
+	// response(&_user, ack);
 	// send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
 }
 
 void Command::ft_quit()
 {
 	std::string ack = "Quit";
-	if (_options.size() > 0)
+	if (_options.size() >= 0)
+	{
 		ack += ": ";
-	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-		ack += *it + " ";
+		for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+			ack += *it + " ";
+	}
 	std::cout << ack << std::endl;
-	response(&_user, ack);
+	_server.sendMessage(ack);
 	_server.deleteUser(&this->_user);
 }
 
