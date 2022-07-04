@@ -229,7 +229,9 @@ void Server::sendMessage(std::string ack)
 	for (std::list<User *>::iterator it = _users.begin();
 		 it != _users.end(); ++it)
 	{
-		response(*it, ack);
+		User *u = *it;
+		if (u->isAuth())
+			response(*it, ack);
 	}
 	// std::cout << "SERVER MSG: " << ack << std::endl;
 }

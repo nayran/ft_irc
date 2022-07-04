@@ -55,10 +55,6 @@ void Command::run()
 		{
 			if (_command == "USER")
 				ft_user();
-			else if (_command == "QUIT")
-			{
-				ft_quit();
-			}
 			else
 			{
 				std::string ack = "Unknown command: " + _command;
@@ -69,6 +65,10 @@ void Command::run()
 				// 	std::cout << " " << *it;
 				// std::cout << std::endl;
 			}
+			// else if (_command == "QUIT")
+			// {
+			// 	ft_quit();
+			// }
 		}
 		else
 			ft_userexcept();
@@ -97,8 +97,8 @@ void Command::ft_nick()
 	std::string newNick = _options[0];
 	if (_options.size() != 1 && !_user.getNick().empty())
 		return response(&_user, "usage: /NICK <newNick>");
-	if (newNick.length() < 4)
-		return response(&_user, "newNick must have more than 3 chars!");
+	if (newNick.length() < 3)
+		return response(&_user, "newNick must have at least 3 chars!");
 	int i = -1;
 	while (newNick.c_str()[++i + 1])
 	{
