@@ -209,6 +209,18 @@ User *Server::getUserBySocket(int socket)
 	return (nullptr);
 }
 
+User *Server::getUserByNick(std::string nick)
+{
+	std::list<User *>::iterator it = _users.begin();
+	while (it != _users.end())
+	{
+		if ((*it)->getNick() == nick)
+			return (*it);
+		it++;
+	}
+	return (nullptr);
+}
+
 int Server::getSocket()
 {
 	return (_socket);

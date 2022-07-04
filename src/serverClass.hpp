@@ -21,6 +21,7 @@ public:
 	int acceptUser();
 	int receiveMessage(int clifd);
 	User *getUserBySocket(int socket);
+	User *getUserByNick(std::string nick);
 	int getSocket();
 	std::string getPassword();
 	std::list<User *> getUsers();

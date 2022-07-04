@@ -5,8 +5,9 @@ User::User(int client)
 	this->_clientfd = client;
 	this->_nick = "";
 	static int num;
-	_num = ++num;
+	this->_num = ++num;
 	this->_auth = false;
+	this->_oper = false;
 };
 
 User::~User(){};
@@ -60,4 +61,14 @@ bool User::isAuth()
 void User::auth()
 {
 	this->_auth = true;
+}
+
+bool User::isOper()
+{
+	return (this->_oper);
+}
+
+void User::setOper()
+{
+	this->_oper = true;
 }

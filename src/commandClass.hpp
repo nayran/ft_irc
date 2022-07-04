@@ -28,6 +28,7 @@ private:
 	void ft_user();
 	void ft_quit();
 	void ft_pass();
+	void ft_oper();
 
 	void parse(std::string buff);
 	void run();

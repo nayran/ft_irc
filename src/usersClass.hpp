@@ -22,6 +22,8 @@ public:
 	void setRealname(std::string username);
 	bool isAuth();
 	void auth();
+	bool isOper();
+	void setOper();
 
 private:
 	int _clientfd;
@@ -30,6 +32,7 @@ private:
 	std::string _realname;
 	int _num;
 	bool _auth;
+	bool _oper;
 };
 
 #include "serverClass.hpp"

@@ -55,6 +55,8 @@ void Command::run()
 		{
 			if (_command == "USER")
 				ft_user();
+			else if (_command == "OPER")
+				ft_oper();
 			else
 			{
 				std::string ack = "Unknown command: " + _command;
@@ -144,6 +146,23 @@ void Command::ft_quit()
 	std::cout << ack << std::endl;
 	// _server.deleteUser(&this->_user);
 	// _server.sendMessage(ack);
+}
+
+void Command::ft_oper()
+{
+	if (_options.size() != 2)
+		return response(&_user, "usage: /OPER <nickname> <oper_password>");
+	User *u = _server.getUserByNick(_options[0]);
+	if (u == nullptr)
+		return response(&_user, "There's no user with this nick!");
+	if (u->isOper())
+		return response(&_user, _options[0] + " is an operator already!");
+	if (_options[1] == OPER_PASS)
+		u->setOper();
+	else
+		return response(&_user, "Wrong password");
+	response(&_user, _options[0] + " became an operator!");
+	response(u, "You became an operator. With great power comes great responsibility!");
 }
 
 void Command::ft_userexcept()
