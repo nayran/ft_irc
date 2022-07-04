@@ -5,6 +5,7 @@
 #include <cctype>
 
 class Server;
+class Channel;
 
 class User
 {
@@ -24,6 +25,8 @@ public:
 	void auth();
 	bool isOper();
 	void setOper();
+	void addChannel(Channel *channel);
+	void userResponse(std::string ack);
 
 private:
 	int _clientfd;
@@ -33,8 +36,10 @@ private:
 	int _num;
 	bool _auth;
 	bool _oper;
+	std::list<Channel *> _channels;
 };
 
+#include "channelClass.hpp"
 #include "serverClass.hpp"
 
 #endif

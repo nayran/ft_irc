@@ -29,14 +29,14 @@ private:
 	void ft_quit();
 	void ft_pass();
 	void ft_oper();
+	void ft_join();
 
 	void parse(std::string buff);
 	void run();
 };
 
-void response(User *user, std::string ack);
 
 #include "serverClass.hpp"
-#include "usersClass.hpp"
+#include "userClass.hpp"
 
 #endif

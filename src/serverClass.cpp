@@ -8,6 +8,7 @@ Server::Server(std::string host, std::string port, std::string password)
 
 Server::~Server(){
 	// delete users
+	// delete channels
 };
 
 /*
@@ -236,14 +237,14 @@ std::list<User *> Server::getUsers()
 	return (_users);
 }
 
-void Server::sendMessage(std::string ack)
+void Server::serverResponse(std::string ack)
 {
 	for (std::list<User *>::iterator it = _users.begin();
 		 it != _users.end(); ++it)
 	{
 		User *u = *it;
 		if (u->isAuth())
-			response(*it, ack);
+			(*it)->userResponse(ack);
 	}
 	// std::cout << "SERVER MSG: " << ack << std::endl;
 }
@@ -263,4 +264,21 @@ void Server::deleteUser(User *user)
 			// return;
 		}
 	}
+}
+
+Channel *Server::getChannelByName(std::string name)
+{
+	std::list<Channel *>::iterator it = _channels.begin();
+	while (it != _channels.end())
+	{
+		if ((*it)->getName() == name)
+			return (*it);
+		it++;
+	}
+	return (nullptr);
+}
+
+void Server::addChannel(Channel *channel)
+{
+	_channels.push_back(channel);
 }

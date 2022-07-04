@@ -6,6 +6,7 @@
 #include <exception>
 #include <unistd.h>
 #include <poll.h>
+#include "channelClass.hpp"
 
 class User;
 class Command;
@@ -25,8 +26,10 @@ public:
 	int getSocket();
 	std::string getPassword();
 	std::list<User *> getUsers();
-	void sendMessage(std::string ack);
+	void serverResponse(std::string ack);
 	void deleteUser(User *_user);
+	Channel *getChannelByName(std::string name);
+	void addChannel(Channel *channel);
 
 private:
 	std::string _host;
@@ -35,9 +38,10 @@ private:
 	int _socket;
 	std::vector<pollfd> _fdvec;
 	std::list<User *> _users;
+	std::list<Channel *> _channels;
 };
 
-#include "usersClass.hpp"
+#include "userClass.hpp"
 #include "commandClass.hpp"
 
 #endif

@@ -1,4 +1,4 @@
-#include "usersClass.hpp"
+#include "userClass.hpp"
 
 User::User(int client)
 {
@@ -71,4 +71,24 @@ bool User::isOper()
 void User::setOper()
 {
 	this->_oper = true;
+}
+
+void User::addChannel(Channel *channel)
+{
+	std::list<Channel *>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); it++)
+	{
+		if ((*it)->getName() == channel->getName())
+			return this->userResponse("You already joined this channel!");
+	}
+	_channels.push_back(channel);
+	channel->addUser(this);
+}
+
+void User::userResponse(std::string ack)
+{
+	std::string res = ":127.0.0.1 " + this->getNum() + " ";
+	res += this->getNick() + " :" + ack + "\r\n";
+	// std::cout << res << std::endl;
+	send(this->getSocket(), res.c_str(), strlen(res.c_str()), 0);
 }
