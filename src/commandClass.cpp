@@ -98,7 +98,7 @@ void Command::ft_nick()
 	if (_options.size() != 1 && !_user.getNick().empty())
 		return response(&_user, "usage: /NICK <newNick>");
 	if (newNick.length() < 4)
-		return response(&_user, "newNick must has 3 chars!");
+		return response(&_user, "newNick must have more than 3 chars!");
 	int i = -1;
 	while (newNick.c_str()[++i + 1])
 	{
@@ -135,15 +135,15 @@ void Command::ft_user()
 void Command::ft_quit()
 {
 	std::string ack = "Quit";
-	if (_options.size() >= 0)
+	if (_options.size() > 0)
 	{
 		ack += ": ";
 		for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
 			ack += *it + " ";
 	}
 	std::cout << ack << std::endl;
-	_server.sendMessage(ack);
-	_server.deleteUser(&this->_user);
+	// _server.deleteUser(&this->_user);
+	// _server.sendMessage(ack);
 }
 
 void Command::ft_userexcept()

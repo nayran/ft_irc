@@ -108,7 +108,6 @@ void Server::setSockets()
 
 void Server::init()
 {
-
 	pollfd fd = {_socket, POLLIN, 0};
 	if (fcntl(_socket, F_SETFL, O_NONBLOCK) == -1)
 		throw std::runtime_error("error: could not set fcntl flags");
@@ -145,6 +144,8 @@ void Server::init2()
 		}
 		if ((thisPollFd.revents & POLLHUP) == POLLHUP)
 		{
+			std::cout << "pollhup" << std::endl
+					  << std::flush;
 			break;
 		}
 	}
@@ -238,12 +239,14 @@ void Server::deleteUser(User *user)
 	std::list<User *>::iterator it;
 	for (it = _users.begin(); it != _users.end(); ++it)
 	{
-		if ((*it)->getSocket() == user->getSocket())
+		if (*it == user)
 		{
-			close(user->getSocket());
-			delete *it;
 			_users.erase(it);
-			return;
+			break;
+			// close(user->getSocket());
+			// delete *it;
+			// _users.erase(it);
+			// return;
 		}
 	}
 }
