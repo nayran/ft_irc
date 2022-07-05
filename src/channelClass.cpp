@@ -4,10 +4,16 @@ Channel::Channel(std::string name, std::string password)
 {
     _name = name;
     _password = password;
+    _topic = name;
 }
 
 Channel::~Channel()
 {
+}
+
+std::list<User *> Channel::getUsers()
+{
+    return _users;
 }
 
 std::string Channel::getName()
@@ -31,15 +37,13 @@ std::string Channel::getPassword()
     return _password;
 }
 
-// void Channel::channelResponse(std::string ack)
-// {
-//     for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
-//     {
-//         // :nayran2 JOIN #dsf
-//         // std::string res = ":127.0.0.1 001 ";
-//         std::string res = ":" + (*it)->getNick() + " JOIN " + this->getName() + "\r\n";
-//         send((*it)->getSocket(), res.c_str(), strlen(res.c_str()), 0);
-//         std::cout << res << std::endl;
-//         std::cout << ack << std::endl;
-//     }
-// }
+void Channel::messageChannel(std::string message)
+{
+    if (message.find("\r\n"))
+        message += "\r\n";
+    for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
+            throw std::runtime_error(strerror(errno));
+    }
+}

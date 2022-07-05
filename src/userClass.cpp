@@ -75,3 +75,12 @@ void User::addChannel(Channel *channel)
 	_channels.push_back(channel);
 	channel->addUser(this);
 }
+
+void User::messageUser(std::string message)
+{
+	if (message.find("\r\n"))
+		message += "\r\n";
+	if (send(this->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
+		throw std::runtime_error(strerror(errno));
+	// std::cout << "SERVER MSG: " << ack << std::endl;
+}

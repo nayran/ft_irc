@@ -15,11 +15,9 @@ public:
 	~Command();
 
 	void ft_exception(std::string s);
-
 	void shutdown(int sig);
 	bool specialChar(std::string s, size_t i = 0);
-
-	void numericResponse(std::string message, std::string resnum, int socket = 0);
+	void numericResponse(std::string message, std::string resnum, int socket = 0, std::string moreopts = "");
 
 private:
 	std::vector<std::string> _options;

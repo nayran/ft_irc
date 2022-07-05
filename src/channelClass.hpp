@@ -14,11 +14,14 @@ public:
     std::string getName();
     void addUser(User *user);
     std::string getPassword();
+    std::list<User *> getUsers();
+    void messageChannel(std::string message);
 
 private:
     std::string _name;
     std::list<User *> _users;
     std::string _password;
+    std::string _topic;
     // Server *_server;
 };
 

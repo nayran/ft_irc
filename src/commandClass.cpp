@@ -39,7 +39,7 @@ void Command::run()
 {
 	if (_command == "CAP")
 		numericResponse("CAP * ACK multi-prefix", "");
-	else if (_command == "PONG")
+	if (_command == "PONG")
 		return;
 	else if (_command == "PASS")
 		ft_pass();
@@ -55,8 +55,14 @@ void Command::run()
 				ft_oper();
 			else if (_command == "JOIN")
 				ft_join();
+
+			// 		// else if (_command == "QUIT")
+			// 		// {
+			// 		// 	ft_quit();
+			// 		// }
 			else
 			{
+				// std::cout << "else" << std::endl;
 				std::string ack = "Unknown command: " + _command;
 				std::cout << ack << std::endl;
 				numericResponse(ack, "001");
@@ -65,10 +71,6 @@ void Command::run()
 					std::cout << " " << *it;
 				std::cout << std::endl;
 			}
-			// 		// else if (_command == "QUIT")
-			// 		// {
-			// 		// 	ft_quit();
-			// 		// }
 		}
 		else
 			ft_exception("nick");
@@ -79,30 +81,24 @@ void Command::run()
 
 void Command::ft_join()
 {
-	if (*_options.begin() == "#")
-		_options.erase(_options.begin());
+	if (*_options.begin() == "#" || _options.size() < 1 || _options.size() > 2)
+		return numericResponse("usage: /JOIN <channel> [<channel_password>]", "461");
 	if (specialChar(*_options.begin(), 1))
-		std::cout << "special char" << std::endl;
-	std::cout << *_options.begin() << std::endl;
-	// if (_options.size() < 1 || _options.size() > 2)
-	// 	return _user.userResponse("usage: /JOIN <channel> [<channel_password>]");
-	// Channel *channel = _server.getChannelByName(_options[0]);
-	// if (_options.size() == 1)
-	// 	_options.push_back("");
-	// if (!channel)
-	// {
-	// 	channel = new Channel(_options[0], _options[1]);
-	// 	_server.addChannel(channel);
-	// }
-	// if (_options[1] != channel->getPassword())
-	// 	return _user.userResponse("Wrong channel password");
-	// else
-	// 	_user.addChannel(channel);
-	// // std::string ack;
-	// // ack = " JOIN " + channel->getName();
-	// // ack = _user.getNick() + " joined the channel " + _options[0];
-	// // ack = "JOIN " + channel->getName() + " :" + "joinedchannel";
-	// channel->channelResponse("welcome to the channel");
+		return numericResponse("Channel name cannot have special chars!", "403");
+	if (_options.size() == 1)
+		_options.push_back("");
+	Channel *channel = _server.getChannelByName(_options[0]);
+	if (!channel)
+	{
+		channel = new Channel(_options[0], _options[1]);
+		_server.addChannel(channel);
+	}
+	if (_options[1] != channel->getPassword())
+		return numericResponse("Wrong channel password", "464");
+	else
+		_user.addChannel(channel);
+	// _user.messageUser(":" + _user.getNick() + " JOIN " + channel->getName());
+	channel->messageChannel(":" + _user.getNick() + " JOIN " + channel->getName());
 }
 
 void Command::ft_pass()
@@ -115,7 +111,6 @@ void Command::ft_pass()
 		_user.auth();
 	else
 		return numericResponse("Wrong password", "461");
-	numericResponse("Welcome to Nayran's ft_irc " + _user.getNick(), "001");
 }
 
 void Command::ft_nick()
@@ -136,10 +131,10 @@ void Command::ft_nick()
 		if ((*it)->getNick() == newNick)
 			return numericResponse("Nick already in use!", "433");
 	}
-	if (_user.getNick() != "")
-		_server.messageAll(":" + _user.getNick() + " NICK " + newNick);
-	else
-		_server.messageAll(":127.0.0.1 001 all :" + newNick + " joined the server");
+	// if (_user.getNick() != "")
+	_server.messageAll(":" + _user.getNick() + " NICK " + newNick);
+	// else
+	// 	_server.messageAll(":127.0.0.1 001 all :" + newNick + " joined the server");
 	_user.setNick(newNick);
 }
 
@@ -151,9 +146,9 @@ void Command::ft_user()
 		return numericResponse("You are already registered", "468");
 	_user.setUsername(_options[0]);
 	_user.setRealname(_options[3]);
-	// std::string ack = "USER " + _options[0] + " 0 * " + _options[3];
-	// userResponse(ack);
-	// send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
+	std::string ack = "USER " + _options[0] + " 0 * " + _options[3] + "\r\n";
+	send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
+	numericResponse("Welcome to Nayran's ft_irc " + _user.getNick(), "001");
 }
 
 // void Command::ft_quit()
@@ -196,12 +191,14 @@ void Command::ft_exception(std::string s)
 }
 
 // https://www.alien.net.au/irc/irc2numerics.html
-void Command::numericResponse(std::string message, std::string resnum, int socket)
+void Command::numericResponse(std::string message, std::string resnum, int socket, std::string moreopts)
 {
 	std::string nick = _user.getNick();
 	if (!nick.length())
 		nick = "unknown";
 	std::string res = ":127.0.0.1 " + resnum + " " + nick + " ";
+	if (moreopts != "")
+		res += moreopts + " ";
 	res += ":" + message + "\r\n";
 	if (!socket)
 		socket = _user.getSocket();

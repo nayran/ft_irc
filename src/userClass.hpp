@@ -25,6 +25,7 @@ public:
 	bool isOper();
 	void setOper();
 	void addChannel(Channel *channel);
+	void messageUser(std::string message);
 
 private:
 	int _clientfd;
