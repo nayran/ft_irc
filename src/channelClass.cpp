@@ -33,9 +33,13 @@ std::string Channel::getPassword()
 
 void Channel::channelResponse(std::string ack)
 {
-    for (std::list<User *>::iterator it = _users.begin();
-         it != _users.end(); ++it)
+    for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
     {
-        (*it)->userResponse(ack);
+        // :nayran2 JOIN #dsf
+        // std::string res = ":127.0.0.1 001 ";
+        std::string res = ":" + (*it)->getNick() + " JOIN " + this->getName() + "\r\n";
+        send((*it)->getSocket(), res.c_str(), strlen(res.c_str()), 0);
+        std::cout << res << std::endl;
+        std::cout << ack << std::endl;
     }
 }

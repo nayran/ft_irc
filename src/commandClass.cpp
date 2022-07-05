@@ -107,7 +107,7 @@ void Command::ft_join()
 	// ack = " JOIN " + channel->getName();
 	// ack = _user.getNick() + " joined the channel " + _options[0];
 	// ack = "JOIN " + channel->getName() + " :" + "joinedchannel";
-	// channel->channelResponse(ack);
+	channel->channelResponse("welcome to the channel");
 }
 
 void Command::ft_pass()
