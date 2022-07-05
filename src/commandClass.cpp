@@ -4,10 +4,6 @@ Command::Command(std::string buff, int clisocket, Server &server) : _server(serv
 {
 	parse(buff);
 	run();
-
-	// std::vector<std::string>::iterator it;
-	// for(it = _command.begin(); it != _command.end(); it++)
-	//	std::cout << *it << std::endl;
 };
 
 Command::~Command(){};
@@ -26,7 +22,6 @@ void Command::parse(std::string buff)
 	_options.push_back(buff.substr(0, buff.size()));
 	_command = *_options.begin();
 	_options.erase(_options.begin());
-
 	if ((*_options.begin())[0] == ':')
 	{
 		_options.begin()->erase(0, 1);
@@ -39,7 +34,7 @@ void Command::run()
 {
 	if (_command == "CAP")
 		numericResponse("CAP * ACK multi-prefix", "");
-	if (_command == "PONG")
+	else if (_command == "PONG")
 		return;
 	else if (_command == "PASS")
 		ft_pass();
@@ -55,11 +50,6 @@ void Command::run()
 				ft_oper();
 			else if (_command == "JOIN")
 				ft_join();
-
-			// 		// else if (_command == "QUIT")
-			// 		// {
-			// 		// 	ft_quit();
-			// 		// }
 			else
 			{
 				// std::cout << "else" << std::endl;
