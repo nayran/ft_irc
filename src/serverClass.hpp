@@ -27,6 +27,7 @@ public:
 	std::string getPassword();
 	std::list<User *> getUsers();
 	void messageAll(std::string ack);
+	void messageAllBut(std::string ack, int socket);
 	void deleteUser(User *_user);
 	Channel *getChannelByName(std::string name);
 	void addChannel(Channel *channel);

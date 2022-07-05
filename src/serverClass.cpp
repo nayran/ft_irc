@@ -282,3 +282,16 @@ void Server::messageAll(std::string message)
 	}
 	// std::cout << "SERVER MSG: " << ack << std::endl;
 }
+
+void Server::messageAllBut(std::string message, int socket)
+{
+	if (message.find("\r\n"))
+		message += "\r\n";
+	for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		int thisSock = (*it)->getSocket();
+		if (thisSock != socket)
+			if (send(thisSock, message.c_str(), strlen(message.c_str()), 0) == -1)
+				throw std::runtime_error(strerror(errno));
+	}
+}

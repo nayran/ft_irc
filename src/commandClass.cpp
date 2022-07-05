@@ -49,8 +49,8 @@ void Command::run()
 		{
 			if (_command == "USER")
 				ft_user();
-			// else if (_command == "OPER")
-			// 	ft_oper();
+			else if (_command == "OPER")
+				ft_oper();
 			// 		// else if (_command == "JOIN")
 			// 		// ft_join();
 			else
@@ -126,12 +126,20 @@ void Command::ft_nick()
 		return numericResponse("newNick must have at least 3 chars!", 0, "432");
 	if (newNick == "anonymous" || newNick == "unknown")
 		return numericResponse("This nick cannot be used!", 0, "432");
-	int i = -1;
-	while (newNick.c_str()[++i])
+	for (size_t i = 0; i < newNick.length(); i++)
 	{
-		if (!isalnum(newNick.c_str()[i]))
+		std::cout << newNick + "-" << std::endl;
+
+		if ((newNick[i] >= 48 && newNick[i] <= 57) ||
+			(newNick[i] >= 65 && newNick[i] <= 90) ||
+			(newNick[i] >= 97 && newNick[i] <= 122))
+			continue;
+		else
+		{
 			return numericResponse("newNick cannot have special chars!", 0, "432");
+		}
 	}
+
 	std::list<User *> users = _server.getUsers();
 	std::list<User *>::iterator it = users.begin();
 	for (; it != users.end(); ++it)
@@ -173,22 +181,22 @@ void Command::ft_user()
 // 	// _server.serverResponse(ack);
 // }
 
-// void Command::ft_oper()
-// {
-// 	if (_options.size() != 2)
-// 		return _user.userResponse("usage: /OPER <nickname> <oper_password>");
-// 	User *u = _server.getUserByNick(_options[0]);
-// 	if (u == nullptr)
-// 		return _user.userResponse("There's no user with this nick!");
-// 	if (u->isOper())
-// 		return _user.userResponse(_options[0] + " is an operator already!");
-// 	if (_options[1] == OPER_PASS)
-// 		u->setOper();
-// 	else
-// 		return _user.userResponse("Wrong password");
-// 	_user.userResponse(_options[0] + " became an operator!");
-// 	u->userResponse("You became an operator. With great power comes great responsibility!");
-// }
+void Command::ft_oper()
+{
+	if (_options.size() != 2)
+		return numericResponse("usage: /OPER <nickname> <oper_password>", 0, "461");
+	User *u = _server.getUserByNick(_options[0]);
+	if (u == nullptr)
+		return numericResponse("There's no user with this nick!", 0, "431");
+	if (u->isOper())
+		return numericResponse(_options[0] + " is an operator already!", 0, "610");
+	if (_options[1] == OPER_PASS)
+		u->setOper();
+	else
+		return numericResponse("Wrong password", 0, "464");
+	_server.messageAllBut(":127.0.0.1 001 all :" + _options[0] + " became an operator!", u->getSocket());
+	numericResponse("You became an operator. With great power comes great responsibility!", u->getSocket(), "381");
+}
 
 void Command::ft_exception(std::string s)
 {
