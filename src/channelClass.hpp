@@ -14,7 +14,6 @@ public:
     std::string getName();
     void addUser(User *user);
     std::string getPassword();
-    void channelResponse(std::string ack);
 
 private:
     std::string _name;

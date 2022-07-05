@@ -26,7 +26,7 @@ public:
 	int getSocket();
 	std::string getPassword();
 	std::list<User *> getUsers();
-	void serverResponse(std::string ack);
+	void messageAll(std::string ack);
 	void deleteUser(User *_user);
 	Channel *getChannelByName(std::string name);
 	void addChannel(Channel *channel);

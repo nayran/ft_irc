@@ -14,10 +14,11 @@ public:
 	Command(std::string buff, int client, Server &server);
 	~Command();
 
-	void ft_userexcept();
-	void ft_passexcept();
+	void ft_exception(std::string s);
 
 	void shutdown(int sig);
+
+	void numericResponse(std::string message, int socket, std::string resnum);
 
 private:
 	std::vector<std::string> _options;
@@ -34,7 +35,6 @@ private:
 	void parse(std::string buff);
 	void run();
 };
-
 
 #include "serverClass.hpp"
 #include "userClass.hpp"

@@ -237,18 +237,6 @@ std::list<User *> Server::getUsers()
 	return (_users);
 }
 
-void Server::serverResponse(std::string ack)
-{
-	for (std::list<User *>::iterator it = _users.begin();
-		 it != _users.end(); ++it)
-	{
-		User *u = *it;
-		if (u->isAuth())
-			(*it)->userResponse(ack);
-	}
-	// std::cout << "SERVER MSG: " << ack << std::endl;
-}
-
 void Server::deleteUser(User *user)
 {
 	std::list<User *>::iterator it;
@@ -281,4 +269,16 @@ Channel *Server::getChannelByName(std::string name)
 void Server::addChannel(Channel *channel)
 {
 	_channels.push_back(channel);
+}
+
+void Server::messageAll(std::string message)
+{
+	if (message.find("\r\n"))
+		message += "\r\n";
+	for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
+			throw std::runtime_error(strerror(errno));
+	}
+	// std::cout << "SERVER MSG: " << ack << std::endl;
 }
