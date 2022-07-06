@@ -15,7 +15,9 @@ public:
     void addUser(User *user);
     std::string getPassword();
     std::list<User *> getUsers();
+    User *getUserByNick(std::string name);
     void messageChannel(std::string message);
+    void deleteUser(User *user);
 
 private:
     std::string _name;

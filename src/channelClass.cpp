@@ -47,3 +47,26 @@ void Channel::messageChannel(std::string message)
             throw std::runtime_error(strerror(errno));
     }
 }
+
+User *Channel::getUserByNick(std::string name)
+{
+    for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        if (name == (*it)->getNick())
+            return *it;
+    }
+    return nullptr;
+}
+
+void Channel::deleteUser(User *user)
+{
+    for (std::list<User *>::iterator it = _users.begin();
+         it != _users.end(); ++it)
+    {
+        if (*it == user)
+        {
+            _users.erase(it);
+            return;
+        }
+    }
+}

@@ -30,6 +30,8 @@ void Command::parse(std::string buff)
 	}
 }
 
+// https://simple.wikipedia.org/wiki/List_of_Internet_Relay_Chat_commands
+// https://datatracker.ietf.org/doc/html/rfc1459
 void Command::run()
 {
 	if (_command == "CAP")
@@ -50,13 +52,13 @@ void Command::run()
 				ft_oper();
 			else if (_command == "JOIN")
 				ft_join();
+			else if (_command == "PART")
+				ft_part();
 			else
 			{
 				// std::cout << "else" << std::endl;
 				std::string ack = "Unknown command: " + _command;
 				std::cout << ack << std::endl;
-				numericResponse(ack, "001");
-				std::cout << "new: " << _command;
 				for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
 					std::cout << " " << *it;
 				std::cout << std::endl;
@@ -67,6 +69,33 @@ void Command::run()
 	}
 	else
 		ft_exception("pass");
+}
+
+void Command::ft_part()
+{
+	if (_options.size() < 1 || _options[0] == "")
+		return numericResponse("usage: /PART <channel> [<message>]", "461");
+	std::vector<std::string>::iterator it = _options.begin();
+	while (it != _options.end())
+	{
+		if ((*it)[0] == ':')
+			it->erase(0, 1);
+		if ((*it)[0] != '#')
+			*it = '#' + *it;
+		Channel *channel = _server.getChannelByName(*it);
+		if (!channel)
+			numericResponse("channel doesn't exist", "403", 0, *it);
+		else if (!channel->getUserByNick(_user.getNick()))
+			numericResponse("you need to join the channel to leave it", "442", 0, *it);
+		else
+		{
+			std::string ack = ":" + _user.getNick() + " PART " + *it;
+			channel->messageChannel(ack);
+			_user.deleteChannel(channel);
+			channel->deleteUser(&_user);
+		}
+		it++;
+	}
 }
 
 // https://stackoverflow.com/questions/43399621/join-command-for-irc-protocol?rq=1

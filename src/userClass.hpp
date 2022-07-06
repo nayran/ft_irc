@@ -26,6 +26,7 @@ public:
 	void setOper();
 	void addChannel(Channel *channel);
 	void messageUser(std::string message);
+	void deleteChannel(Channel *channel);
 
 private:
 	int _clientfd;

@@ -76,6 +76,19 @@ void User::addChannel(Channel *channel)
 	channel->addUser(this);
 }
 
+void User::deleteChannel(Channel *channel)
+{
+	std::list<Channel *>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); it++)
+	{
+		if ((*it) == channel)
+		{
+			_channels.erase(it);
+			return;
+		}
+	}
+}
+
 void User::messageUser(std::string message)
 {
 	if (message.find("\r\n"))

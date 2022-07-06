@@ -24,12 +24,14 @@ private:
 	std::string _command;
 	Server &_server;
 	User &_user;
+
 	void ft_nick();
 	void ft_user();
 	void ft_quit();
 	void ft_pass();
 	void ft_oper();
 	void ft_join();
+	void ft_part();
 
 	void parse(std::string buff);
 	void run();
