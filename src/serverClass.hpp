@@ -30,6 +30,7 @@ public:
 	void messageAllBut(std::string ack, int socket);
 	void deleteUser(User *_user);
 	Channel *getChannelByName(std::string name);
+	std::list<Channel *> getChannels();
 	void addChannel(Channel *channel);
 
 private:

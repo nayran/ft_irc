@@ -54,6 +54,8 @@ void Command::run()
 				ft_join();
 			else if (_command == "PART")
 				ft_part();
+			// else if (_command == "NAMES")
+			// 	ft_names();
 			else
 			{
 				// std::cout << "else" << std::endl;
@@ -71,10 +73,24 @@ void Command::run()
 		ft_exception("pass");
 }
 
+void Command::ft_names()
+{
+	// std::vector<std::string>::iterator it;
+	// std::list<Channel *> channels = _server.getChannels();
+	// if (_options.size() < 1)
+	// 	it = channels.begin();
+	// else
+	// 	it = _options.begin();
+	// for (; it != targets.end(); ++it)
+	// {
+	// 	std::cout << *it << std::endl;
+	// }
+}
+
 void Command::ft_part()
 {
 	if (_options.size() < 1 || _options[0] == "")
-		return numericResponse("usage: /PART <channel> [<message>]", "461");
+		return numericResponse("usage: /PART <channels>", "461");
 	std::vector<std::string>::iterator it = _options.begin();
 	while (it != _options.end())
 	{

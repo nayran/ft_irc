@@ -32,6 +32,7 @@ private:
 	void ft_oper();
 	void ft_join();
 	void ft_part();
+	void ft_names();
 
 	void parse(std::string buff);
 	void run();

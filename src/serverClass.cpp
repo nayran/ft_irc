@@ -266,6 +266,11 @@ Channel *Server::getChannelByName(std::string name)
 	return (nullptr);
 }
 
+std::list<Channel *> Server::getChannels()
+{
+	return _channels;
+}
+
 void Server::addChannel(Channel *channel)
 {
 	_channels.push_back(channel);
