@@ -33,6 +33,7 @@ private:
 	void ft_join();
 	void ft_part();
 	void ft_names();
+	void ft_privmsg();
 
 	void parse(std::string buff);
 	void run();

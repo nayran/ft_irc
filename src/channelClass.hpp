@@ -17,6 +17,7 @@ public:
     std::list<User *> getUsers();
     User *getUserByNick(std::string name);
     void messageChannel(std::string message);
+    void messageChannelBut(std::string message, int socket);
     void deleteUser(User *user);
 
 private:

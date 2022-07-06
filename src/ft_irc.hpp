@@ -12,7 +12,6 @@
 #define HOST "127.0.0.1"
 #define MAX_CONNECTIONS 1024
 #define OPER_PASS "oper42"
-#define CHANNEL_LIMIT 100
 
 /*
  *		FT_IRC

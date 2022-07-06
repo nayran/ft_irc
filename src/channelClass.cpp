@@ -48,6 +48,20 @@ void Channel::messageChannel(std::string message)
     }
 }
 
+void Channel::messageChannelBut(std::string message, int socket)
+{
+    if (message.find("\r\n"))
+        message += "\r\n";
+    for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        if ((*it)->getSocket() != socket)
+        {
+            if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
+                throw std::runtime_error(strerror(errno));
+        }
+    }
+}
+
 User *Channel::getUserByNick(std::string name)
 {
     for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)

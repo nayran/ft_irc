@@ -56,9 +56,10 @@ void Command::run()
 				ft_part();
 			else if (_command == "NAMES")
 				ft_names();
+			else if (_command == "PRIVMSG")
+				ft_privmsg();
 			else
 			{
-				// std::cout << "else" << std::endl;
 				std::string ack = "Unknown command: " + _command;
 				std::cout << ack << std::endl;
 				for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
@@ -71,6 +72,45 @@ void Command::run()
 	}
 	else
 		ft_exception("pass");
+}
+
+void Command::ft_privmsg()
+{
+	if (_options.size() == 0 || _options[0].empty())
+		return numericResponse("You should give a Nick", "411");
+	if (_options.size() == 1 || _options[1].empty())
+		return numericResponse("You should write a message", "411");
+	User sender = _user;
+	if (_options[0][0] != '#')
+	{
+		User *receiver = _server.getUserByNick(_options[0]);
+		if (!receiver)
+			return numericResponse("Nick not found", "401");
+		std::string message;
+		for (std::vector<std::string>::iterator it = _options.begin() + 1; it != _options.end(); it++)
+		{
+			message += *it + " ";
+		}
+		if (message[0] == ':')
+			message.erase(0, 1);
+		std::string res = ":" + sender.getNick() + " PRIVMSG " + receiver->getNick() + " :" + message;
+		receiver->messageUser(res);
+	}
+	else
+	{
+		Channel *channel = _server.getChannelByName(_options[0]);
+		if (!channel)
+			return numericResponse("Channel not found", "401");
+		std::string message;
+		for (std::vector<std::string>::iterator it = _options.begin() + 1; it != _options.end(); it++)
+		{
+			message += *it + " ";
+		}
+		if (message[0] == ':')
+			message.erase(0, 1);
+		std::string res = ":" + sender.getNick() + " PRIVMSG " + channel->getName() + " :" + message;
+		channel->messageChannelBut(res, sender.getSocket());
+	}
 }
 
 void Command::ft_names()
@@ -279,6 +319,7 @@ void Command::numericResponse(std::string message, std::string resnum, int socke
 	res += message + "\r\n";
 	if (!socket)
 		socket = _user.getSocket();
+	// std::cout << res << std::endl;
 	if (send(socket, res.c_str(), strlen(res.c_str()), 0) == -1)
 		throw std::runtime_error(strerror(errno));
 }
