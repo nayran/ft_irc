@@ -69,6 +69,7 @@ void Command::run()
 		ft_exception("pass");
 }
 
+// https://stackoverflow.com/questions/43399621/join-command-for-irc-protocol?rq=1
 void Command::ft_join()
 {
 	if (*_options.begin() == "#" || _options.size() < 1 || _options.size() > 2)
@@ -181,6 +182,7 @@ void Command::ft_exception(std::string s)
 }
 
 // https://www.alien.net.au/irc/irc2numerics.html
+// https://stackoverflow.com/questions/38753029/get-irc-command-response#38753693
 void Command::numericResponse(std::string message, std::string resnum, int socket, std::string moreopts)
 {
 	std::string nick = _user.getNick();
