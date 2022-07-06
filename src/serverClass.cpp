@@ -256,6 +256,8 @@ void Server::deleteUser(User *user)
 
 Channel *Server::getChannelByName(std::string name)
 {
+	if (name[0] != '#')
+		name = '#' + name;
 	std::list<Channel *>::iterator it = _channels.begin();
 	while (it != _channels.end())
 	{

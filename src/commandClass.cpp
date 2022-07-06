@@ -54,8 +54,10 @@ void Command::run()
 				ft_join();
 			else if (_command == "PART")
 				ft_part();
-			// else if (_command == "NAMES")
-			// 	ft_names();
+			else if (_command == "NAMES")
+				ft_names();
+			else if (_command == "MODE")
+				ft_mode();
 			else
 			{
 				// std::cout << "else" << std::endl;
@@ -73,18 +75,42 @@ void Command::run()
 		ft_exception("pass");
 }
 
+// https://www.alien.net.au/irc/chanmodes.html
+// https://datatracker.ietf.org/doc/html/rfc1459#section-4.2.3
+void Command::ft_mode()
+{
+	numericResponse("", "324", 0, _options[0] + " b,k,l,imnpst", 0);
+}
+
 void Command::ft_names()
 {
-	// std::vector<std::string>::iterator it;
-	// std::list<Channel *> channels = _server.getChannels();
-	// if (_options.size() < 1)
-	// 	it = channels.begin();
-	// else
-	// 	it = _options.begin();
-	// for (; it != targets.end(); ++it)
-	// {
-	// 	std::cout << *it << std::endl;
-	// }
+	if (_options.size() < 1 || _options[0].empty())
+	{
+		if (_options[0].empty())
+			_options.erase(_options.begin());
+		std::list<Channel *> channels = _server.getChannels();
+		for (std::list<Channel *>::iterator it = channels.begin(); it != channels.end(); it++)
+		{
+			_options.push_back((*it)->getName());
+		}
+	}
+	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); ++it)
+	{
+		Channel *channel = _server.getChannelByName(*it);
+		if (!channel)
+		{
+			numericResponse("End of /NAMES list", "366", 0, *it);
+			continue;
+		}
+		std::list<User *> users = channel->getUsers();
+		std::string res;
+		for (std::list<User *>::iterator uit = users.begin(); uit != users.end(); uit++)
+		{
+			res += (*uit)->getNick() + " ";
+		}
+		numericResponse(res, "353", 0, "= " + *it);
+		numericResponse("End of /NAMES list", "366", 0, *it);
+	}
 }
 
 void Command::ft_part()
@@ -96,8 +122,6 @@ void Command::ft_part()
 	{
 		if ((*it)[0] == ':')
 			it->erase(0, 1);
-		if ((*it)[0] != '#')
-			*it = '#' + *it;
 		Channel *channel = _server.getChannelByName(*it);
 		if (!channel)
 			numericResponse("channel doesn't exist", "403", 0, *it);
@@ -226,23 +250,6 @@ void Command::ft_exception(std::string s)
 		numericResponse("Provide a password to execute commands", "451");
 }
 
-// https://www.alien.net.au/irc/irc2numerics.html
-// https://stackoverflow.com/questions/38753029/get-irc-command-response#38753693
-void Command::numericResponse(std::string message, std::string resnum, int socket, std::string moreopts)
-{
-	std::string nick = _user.getNick();
-	if (!nick.length())
-		nick = "unknown";
-	std::string res = ":127.0.0.1 " + resnum + " " + nick + " ";
-	if (moreopts != "")
-		res += moreopts + " ";
-	res += ":" + message + "\r\n";
-	if (!socket)
-		socket = _user.getSocket();
-	if (send(socket, res.c_str(), strlen(res.c_str()), 0) == -1)
-		throw std::runtime_error(strerror(errno));
-}
-
 bool Command::specialChar(std::string s, size_t i)
 {
 	for (; i < s.length(); i++)
@@ -253,4 +260,24 @@ bool Command::specialChar(std::string s, size_t i)
 			return true;
 	}
 	return false;
+}
+
+// https://www.alien.net.au/irc/irc2numerics.html
+// https://stackoverflow.com/questions/38753029/get-irc-command-response#38753693
+void Command::numericResponse(std::string message, std::string resnum, int socket, std::string moreopts, int colon)
+{
+	std::string nick = _user.getNick();
+	if (!nick.length())
+		nick = "unknown";
+	std::string res = ":127.0.0.1 " + resnum + " " + nick + " ";
+	if (moreopts != "")
+		res += moreopts + " ";
+	if (colon)
+		res += ":";
+	res += message + "\r\n";
+	if (!socket)
+		socket = _user.getSocket();
+	if (send(socket, res.c_str(), strlen(res.c_str()), 0) == -1)
+		throw std::runtime_error(strerror(errno));
+	std::cout << res << std::endl;
 }
