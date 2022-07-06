@@ -34,6 +34,7 @@ private:
 	void ft_part();
 	void ft_names();
 	void ft_privmsg();
+	void ft_kick();
 
 	void parse(std::string buff);
 	void run();

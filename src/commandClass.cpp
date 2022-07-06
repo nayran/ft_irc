@@ -58,6 +58,8 @@ void Command::run()
 				ft_names();
 			else if (_command == "PRIVMSG")
 				ft_privmsg();
+			else if (_command == "KICK")
+				ft_kick();
 			else
 			{
 				std::string ack = "Unknown command: " + _command;
@@ -72,6 +74,36 @@ void Command::run()
 	}
 	else
 		ft_exception("pass");
+}
+
+void Command::ft_kick()
+{
+	if (_options.size() < 2 || _options[0].empty() || _options[1].empty())
+		return numericResponse("usage: /KICK <channel> <client> [<message>]", "461");
+	if (_options[0][0] != '#')
+		_options[0] = '#' + _options[0];
+	Channel *channel = _server.getChannelByName(_options[0]);
+	if (!channel)
+		return numericResponse("channel doesn't exist", "403", 0, _options[0]);
+	if (!_user.isOper())
+		return numericResponse("You need privileges to kick someone.", "482", 0, channel->getName());
+	if (!channel->getUserByNick(_user.getNick()))
+		return numericResponse("you need to join the channel to send any command to it", "442", 0, channel->getName());
+	User *kickedUser = _server.getUserByNick(_options[1]);
+	if (!kickedUser)
+		return numericResponse(" is not in channel", "441", 0, _options[0] + " " + _options[1]);
+	std::string message;
+	for (std::vector<std::string>::iterator it = _options.begin() + 2; it != _options.end(); it++)
+	{
+		message += *it + " ";
+	}
+	if (message[0] == ':')
+		message.erase(0, 1);
+	std::string res = ":" + _user.getNick() + " KICK " + channel->getName() + " " + kickedUser->getNick() + " " + message;
+	kickedUser->deleteChannel(channel);
+	channel->deleteUser(kickedUser);
+	kickedUser->messageUser(res);
+	channel->messageChannel(res);
 }
 
 void Command::ft_privmsg()
@@ -101,6 +133,8 @@ void Command::ft_privmsg()
 		Channel *channel = _server.getChannelByName(_options[0]);
 		if (!channel)
 			return numericResponse("Channel not found", "401");
+		if (!channel->getUserByNick(_user.getNick()))
+			return numericResponse("you need to join the channel to send a message to it", "442", 0, channel->getName());
 		std::string message;
 		for (std::vector<std::string>::iterator it = _options.begin() + 1; it != _options.end(); it++)
 		{
@@ -153,6 +187,8 @@ void Command::ft_part()
 	{
 		if ((*it)[0] == ':')
 			it->erase(0, 1);
+		if ((*it)[0] != '#')
+			*it = '#' + *it;
 		Channel *channel = _server.getChannelByName(*it);
 		if (!channel)
 			numericResponse("channel doesn't exist", "403", 0, *it);
