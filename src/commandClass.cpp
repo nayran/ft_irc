@@ -56,8 +56,6 @@ void Command::run()
 				ft_part();
 			else if (_command == "NAMES")
 				ft_names();
-			else if (_command == "MODE")
-				ft_mode();
 			else
 			{
 				// std::cout << "else" << std::endl;
@@ -73,13 +71,6 @@ void Command::run()
 	}
 	else
 		ft_exception("pass");
-}
-
-// https://www.alien.net.au/irc/chanmodes.html
-// https://datatracker.ietf.org/doc/html/rfc1459#section-4.2.3
-void Command::ft_mode()
-{
-	numericResponse("", "324", 0, _options[0] + " b,k,l,imnpst", 0);
 }
 
 void Command::ft_names()
@@ -108,6 +99,8 @@ void Command::ft_names()
 		{
 			res += (*uit)->getNick() + " ";
 		}
+		if ((*it)[0] == '#')
+			(*it).erase(0, 1);
 		numericResponse(res, "353", 0, "= " + *it);
 		numericResponse("End of /NAMES list", "366", 0, *it);
 	}
@@ -159,6 +152,17 @@ void Command::ft_join()
 		_user.addChannel(channel);
 	// _user.messageUser(":" + _user.getNick() + " JOIN " + channel->getName());
 	channel->messageChannel(":" + _user.getNick() + " JOIN " + channel->getName());
+	std::list<User *> users = channel->getUsers();
+	std::string res;
+	for (std::list<User *>::iterator uit = users.begin(); uit != users.end(); uit++)
+	{
+		res += (*uit)->getNick() + " ";
+	}
+	std::string channelName = channel->getName();
+	if (channelName[0] == '#')
+		channelName.erase(0, 1);
+	numericResponse(res, "353", 0, "= " + channelName);
+	numericResponse("End of /NAMES list", "366", 0, channelName);
 }
 
 void Command::ft_pass()
@@ -279,5 +283,4 @@ void Command::numericResponse(std::string message, std::string resnum, int socke
 		socket = _user.getSocket();
 	if (send(socket, res.c_str(), strlen(res.c_str()), 0) == -1)
 		throw std::runtime_error(strerror(errno));
-	std::cout << res << std::endl;
 }
