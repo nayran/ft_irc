@@ -88,20 +88,18 @@ void Command::ft_names()
 	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); ++it)
 	{
 		Channel *channel = _server.getChannelByName(*it);
-		if (!channel)
+		if (channel)
 		{
-			numericResponse("End of /NAMES list", "366", 0, *it);
-			continue;
+			std::list<User *> users = channel->getUsers();
+			std::string res;
+			for (std::list<User *>::iterator uit = users.begin(); uit != users.end(); uit++)
+			{
+				res += (*uit)->getNick() + " ";
+			}
+			if ((*it)[0] == '#')
+				(*it).erase(0, 1);
+			numericResponse(res, "353", 0, "= " + *it);
 		}
-		std::list<User *> users = channel->getUsers();
-		std::string res;
-		for (std::list<User *>::iterator uit = users.begin(); uit != users.end(); uit++)
-		{
-			res += (*uit)->getNick() + " ";
-		}
-		if ((*it)[0] == '#')
-			(*it).erase(0, 1);
-		numericResponse(res, "353", 0, "= " + *it);
 		numericResponse("End of /NAMES list", "366", 0, *it);
 	}
 }
