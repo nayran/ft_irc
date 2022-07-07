@@ -40,10 +40,11 @@ void User::setRealname(std::string realname)
 	_realname = realname;
 }
 
-// std::string User::getRealname()
-// {
-// 	return (this->_realname);
-// }
+std::string User::getRealname()
+{
+	return (this->_realname);
+}
+
 bool User::isAuth()
 {
 	return (this->_auth);

@@ -49,34 +49,63 @@ void Command::run()
 		{
 			if (_command == "USER")
 				ft_user();
-			else if (_command == "OPER")
-				ft_oper();
-			else if (_command == "JOIN")
-				ft_join();
-			else if (_command == "PART")
-				ft_part();
-			else if (_command == "NAMES")
-				ft_names();
-			else if (_command == "PRIVMSG")
-				ft_privmsg();
-			else if (_command == "KICK")
-				ft_kick();
-			else if (_command == "MODE")
-				ft_mode();
-			else
+			else if (!_user.getUsername().empty())
 			{
-				std::string ack = "Unknown command: " + _command;
-				std::cout << ack << std::endl;
-				for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-					std::cout << " " << *it;
-				std::cout << std::endl;
+				if (_command == "OPER")
+					ft_oper();
+				else if (_command == "JOIN")
+					ft_join();
+				else if (_command == "PART")
+					ft_part();
+				else if (_command == "NAMES")
+					ft_names();
+				else if (_command == "PRIVMSG")
+					ft_privmsg();
+				else if (_command == "KICK")
+					ft_kick();
+				else if (_command == "MODE")
+					ft_mode();
+				else if (_command == "WHO")
+					ft_who();
+				else
+					numericResponse(_command + " :Unknown command", "421");
 			}
+			else
+				return numericResponse("provide a user: /USER <username> <hostname> <servername> <realname>", "431");
 		}
 		else
-			ft_exception("nick");
+			return numericResponse("provide a nick: /NICK <newNick>", "431");
 	}
 	else
-		ft_exception("pass");
+		return numericResponse("provide a password: /PASS <password>", "464");
+}
+
+void Command::ft_who()
+{
+	if (_options.size() > 2)
+		return numericResponse("usage: /WHO [<name> [<o>]]", "461");
+	std::list<User *> users = _server.getUsers();
+	std::string res;
+	if (_options.size() == 0 || _options.begin()->empty())
+	{
+		for (std::list<User *>::iterator it = users.begin(); it != users.end(); it++)
+			numericResponse((*it)->getRealname(), "352", 0, (*it)->getUsername() + " 0 * " + (*it)->getNick());
+	}
+	else
+	{
+		for (std::list<User *>::iterator it = users.begin(); it != users.end(); it++)
+		{
+			res = (*it)->getUsername() + " 0 * " + (*it)->getNick();
+			if (res.find(_options[0], 0) != std::string::npos || (*it)->getRealname().find(_options[0], 0) != std::string::npos)
+			{
+				if (_options.size() == 2 && _options[1] == "o" && (*it)->isOper())
+					numericResponse((*it)->getRealname(), "352", 0, res);
+				else if (_options.size() == 1 || _options[1].empty())
+					numericResponse((*it)->getRealname(), "352", 0, res);
+			}
+		}
+	}
+	numericResponse("End of /WHO list", "315", 0);
 }
 
 void Command::ft_mode()
@@ -259,7 +288,10 @@ void Command::ft_pass()
 	if (_user.isAuth())
 		return numericResponse("You are already registered", "462");
 	if (_options[0] == _server.getPassword())
+	{
 		_user.auth();
+		return numericResponse("Password OK", "338");
+	}
 	else
 		return numericResponse("Wrong password", "461");
 }
@@ -331,14 +363,6 @@ void Command::ft_oper()
 		return numericResponse("Wrong password", "464");
 	_server.messageAllBut(":127.0.0.1 001 all :" + _options[0] + " became an operator!", u->getSocket());
 	numericResponse("You became an operator. With great power comes great responsibility!", "381", u->getSocket());
-}
-
-void Command::ft_exception(std::string s)
-{
-	if (s == "nick")
-		numericResponse("Provide a nick to execute commands", "451");
-	if (s == "pass")
-		numericResponse("Provide a password to execute commands", "451");
 }
 
 bool Command::specialChar(std::string s, size_t i)

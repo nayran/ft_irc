@@ -16,7 +16,7 @@ public:
 
 	std::string getNick();
 	std::string getUsername();
-	// std::string getRealname();
+	std::string getRealname();
 	void setNick(std::string);
 	void setUsername(std::string username);
 	void setRealname(std::string username);

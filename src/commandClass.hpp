@@ -14,7 +14,6 @@ public:
 	Command(std::string buff, int client, Server &server);
 	~Command();
 
-	void ft_exception(std::string s);
 	void shutdown(int sig);
 	bool specialChar(std::string s, size_t i = 0);
 	void numericResponse(std::string message, std::string resnum, int socket = 0, std::string moreopts = "", int colon = 1);
@@ -36,6 +35,7 @@ private:
 	void ft_privmsg();
 	void ft_kick();
 	void ft_mode();
+	void ft_who();
 
 	void parse(std::string buff);
 	void run();
