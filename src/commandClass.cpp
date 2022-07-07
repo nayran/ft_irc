@@ -60,6 +60,8 @@ void Command::run()
 				ft_privmsg();
 			else if (_command == "KICK")
 				ft_kick();
+			else if (_command == "MODE")
+				ft_mode();
 			else
 			{
 				std::string ack = "Unknown command: " + _command;
@@ -74,6 +76,11 @@ void Command::run()
 	}
 	else
 		ft_exception("pass");
+}
+
+void Command::ft_mode()
+{
+	numericResponse("", "324", 0, _options[0] + " l " + std::to_string(CHANNEL_LIMIT), 0);
 }
 
 void Command::ft_kick()
@@ -223,7 +230,11 @@ void Command::ft_join()
 	if (_options[1] != channel->getPassword())
 		return numericResponse("Wrong channel password", "464");
 	else
+	{
+		if (channel->getUsers().size() == CHANNEL_LIMIT)
+			return numericResponse("channel is full", "442", 0, channel->getName());
 		_user.addChannel(channel);
+	}
 	// _user.messageUser(":" + _user.getNick() + " JOIN " + channel->getName());
 	channel->messageChannel(":" + _user.getNick() + " JOIN " + channel->getName());
 	std::list<User *> users = channel->getUsers();

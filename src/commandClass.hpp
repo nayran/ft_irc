@@ -35,6 +35,7 @@ private:
 	void ft_names();
 	void ft_privmsg();
 	void ft_kick();
+	void ft_mode();
 
 	void parse(std::string buff);
 	void run();
