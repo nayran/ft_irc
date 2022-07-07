@@ -45,6 +45,8 @@ void Command::run()
 		ft_pass();
 	else if (_command == "QUIT")
 		ft_quit();
+	else if (_command == "HELP")
+		ft_help();
 	else if (_user.isAuth())
 	{
 		if (_command == "NICK")
@@ -82,6 +84,13 @@ void Command::run()
 	}
 	else
 		return numericResponse("provide a password: /PASS <password>", "464");
+}
+
+void Command::ft_help()
+{
+	numericResponse("You must provide Pass, Nick and User informations", "704");
+	numericResponse("Available commands: NICK, USER, PASS, OPER, JOIN, PART, NAMES, PRIVMSG, KICK, MODE, WHO, QUIT, HELP", "705");
+	numericResponse("usage: /<command>", "706");
 }
 
 void Command::ft_quit()

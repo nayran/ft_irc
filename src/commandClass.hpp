@@ -36,6 +36,7 @@ private:
 	void ft_mode();
 	void ft_who();
 	void ft_quit();
+	void ft_help();
 
 	void parse(std::string buff);
 	void run();
