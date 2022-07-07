@@ -95,6 +95,6 @@ void User::messageUser(std::string message)
 	if (message.find("\r\n"))
 		message += "\r\n";
 	if (send(this->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error("Could't send messageUser");
 	// std::cout << "SERVER MSG: " << ack << std::endl;
 }

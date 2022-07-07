@@ -8,6 +8,16 @@ Command::Command(std::string buff, int clisocket, Server &server) : _server(serv
 
 Command::~Command(){};
 
+std::string to_upper(std::string s)
+{
+	int x = -1;
+	while (s[++x] != '\0')
+	{
+		s[x] = std::toupper(s[x]);
+	}
+	return s;
+}
+
 void Command::parse(std::string buff)
 {
 	if (buff[0] == '/')
@@ -22,7 +32,7 @@ void Command::parse(std::string buff)
 		buff.erase(0, pos + 1);
 	}
 	_options.push_back(buff.substr(0, buff.size()));
-	_command = *_options.begin();
+	_command = to_upper(*_options.begin());
 	_options.erase(_options.begin());
 	if (_options.size() > 0)
 	{
@@ -134,8 +144,12 @@ void Command::ft_who()
 
 void Command::ft_mode()
 {
+	std::string limit;
+	std::ostringstream convert;
+	convert << CHANNEL_LIMIT;
+	limit = convert.str();
 	if (_options.size() > 0 && !_options[0].empty())
-		numericResponse("", "324", 0, _options[0] + " l " + std::to_string(CHANNEL_LIMIT), 0);
+		numericResponse("", "324", 0, _options[0] + " l " + limit, 0);
 }
 
 void Command::ft_kick()
@@ -378,7 +392,7 @@ void Command::ft_oper()
 	if (_options.size() != 2)
 		return numericResponse("usage: /OPER <nickname> <oper_password>", "461");
 	User *u = _server.getUserByNick(_options[0]);
-	if (u == nullptr)
+	if (!u)
 		return numericResponse("There's no user with this nick!", "431");
 	if (u->isOper())
 		return numericResponse(_options[0] + " is an operator already!", "610");
@@ -419,5 +433,5 @@ void Command::numericResponse(std::string message, std::string resnum, int socke
 		socket = _user.getSocket();
 	// std::cout << res << std::endl;
 	if (send(socket, res.c_str(), strlen(res.c_str()), 0) == -1)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error("Couldn't SEND socket");
 }

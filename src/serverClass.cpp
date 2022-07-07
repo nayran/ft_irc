@@ -159,11 +159,10 @@ int Server::receiveMessage(int clifd)
 	char *buff = new char[512];
 	std::string buffaux;
 	memset(buff, '\0', 512);
-	size_t nbytes;
 	int a = 0;
 	while (buffaux.find("\r\n"))
 	{
-		if ((nbytes = recv(clifd, buff, 1, 0)) < 0)
+		if (recv(clifd, buff, 1, 0) < 0)
 			throw std::runtime_error("RECV ERROR");
 		else
 		{
@@ -212,7 +211,7 @@ User *Server::getUserBySocket(int socket)
 			return (*it);
 		it++;
 	}
-	return (nullptr);
+	return (NULL);
 }
 
 User *Server::getUserByNick(std::string nick)
@@ -224,7 +223,7 @@ User *Server::getUserByNick(std::string nick)
 			return (*it);
 		it++;
 	}
-	return (nullptr);
+	return (NULL);
 }
 
 int Server::getSocket()
@@ -268,7 +267,7 @@ Channel *Server::getChannelByName(std::string name)
 			return (*it);
 		it++;
 	}
-	return (nullptr);
+	return (NULL);
 }
 
 std::list<Channel *> Server::getChannels()
@@ -288,7 +287,7 @@ void Server::messageAll(std::string message)
 	for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
 		if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
-			throw std::runtime_error(strerror(errno));
+			throw std::runtime_error("Couldn't SEND messageAll");
 	}
 	// std::cout << "SERVER MSG: " << ack << std::endl;
 }
@@ -302,6 +301,6 @@ void Server::messageAllBut(std::string message, int socket)
 		int thisSock = (*it)->getSocket();
 		if (thisSock != socket)
 			if (send(thisSock, message.c_str(), strlen(message.c_str()), 0) == -1)
-				throw std::runtime_error(strerror(errno));
+				throw std::runtime_error("Couldn't SEND messageAllBut");
 	}
 }

@@ -44,7 +44,7 @@ void Channel::messageChannel(std::string message)
     for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
     {
         if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
-            throw std::runtime_error(strerror(errno));
+            throw std::runtime_error("Couldn't SEND messageChannel");
     }
 }
 
@@ -57,7 +57,7 @@ void Channel::messageChannelBut(std::string message, int socket)
         if ((*it)->getSocket() != socket)
         {
             if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
-                throw std::runtime_error(strerror(errno));
+                throw std::runtime_error("Couldn't SEND messageChannelBut");
         }
     }
 }
@@ -69,7 +69,7 @@ User *Channel::getUserByNick(std::string name)
         if (name == (*it)->getNick())
             return *it;
     }
-    return nullptr;
+    return NULL;
 }
 
 void Channel::deleteUser(User *user)
