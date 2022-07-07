@@ -6,9 +6,14 @@ Server::Server(std::string host, std::string port, std::string password)
 	setSockets();
 };
 
-Server::~Server(){
-	// delete users
-	// delete channels
+Server::~Server()
+{
+	for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); it++)
+		delete *it;
+	for (std::list<Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		delete *it;
+	_users.clear();
+	_channels.clear();
 };
 
 /*
