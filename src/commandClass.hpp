@@ -26,7 +26,6 @@ private:
 
 	void ft_nick();
 	void ft_user();
-	void ft_quit();
 	void ft_pass();
 	void ft_oper();
 	void ft_join();
@@ -36,6 +35,7 @@ private:
 	void ft_kick();
 	void ft_mode();
 	void ft_who();
+	void ft_quit();
 
 	void parse(std::string buff);
 	void run();

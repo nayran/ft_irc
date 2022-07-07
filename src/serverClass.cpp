@@ -245,13 +245,11 @@ void Server::deleteUser(User *user)
 		if (*it == user)
 		{
 			_users.erase(it);
-			break;
-			// close(user->getSocket());
 			// delete *it;
-			// _users.erase(it);
-			// return;
+			break;
 		}
 	}
+	close(user->getSocket());
 }
 
 Channel *Server::getChannelByName(std::string name)

@@ -67,6 +67,8 @@ void Command::run()
 					ft_mode();
 				else if (_command == "WHO")
 					ft_who();
+				else if (_command == "QUIT")
+					ft_quit();
 				else
 					numericResponse(_command + " :Unknown command", "421");
 			}
@@ -78,6 +80,17 @@ void Command::run()
 	}
 	else
 		return numericResponse("provide a password: /PASS <password>", "464");
+}
+
+void Command::ft_quit()
+{
+	std::string message;
+	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
+	{
+		message += *it + " ";
+	}
+	_server.messageAll(":" + _user.getNick() + " QUIT :" + message);
+	_server.deleteUser(&_user);
 }
 
 void Command::ft_who()
