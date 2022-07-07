@@ -22,9 +22,10 @@ void Command::parse(std::string buff)
 	_options.push_back(buff.substr(0, buff.size()));
 	_command = *_options.begin();
 	_options.erase(_options.begin());
-	if ((*_options.begin())[0] == ':')
+	if (_options.size() > 0)
 	{
-		_options.begin()->erase(0, 1);
+		if ((*_options.begin())[0] == ':')
+			_options.begin()->erase(0, 1);
 		if (*_options.begin() == "")
 			_options.erase(_options.begin());
 	}
@@ -80,7 +81,8 @@ void Command::run()
 
 void Command::ft_mode()
 {
-	numericResponse("", "324", 0, _options[0] + " l " + std::to_string(CHANNEL_LIMIT), 0);
+	if (_options.size() > 0 && !_options[0].empty())
+		numericResponse("", "324", 0, _options[0] + " l " + std::to_string(CHANNEL_LIMIT), 0);
 }
 
 void Command::ft_kick()
