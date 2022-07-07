@@ -276,6 +276,8 @@ void Command::ft_join()
 		return numericResponse("Channel name cannot have special chars!", "403");
 	if (_options.size() == 1)
 		_options.push_back("");
+	if ((_options[0] == "vila56" || _options[0] == "#vila56") && (_user.getNick() != "jhow" && _user.getNick() != "nayran" && _user.getNick() != "edu" && _user.getNick() != "marcus" && _user.getNick() != "matthos"))
+		return numericResponse("Only special villagers can enter this one!", "482");
 	Channel *channel = _server.getChannelByName(_options[0]);
 	if (!channel)
 	{
@@ -287,10 +289,9 @@ void Command::ft_join()
 	else
 	{
 		if (channel->getUsers().size() == CHANNEL_LIMIT)
-			return numericResponse("channel is full", "442", 0, channel->getName());
+			return numericResponse("channel is full", "471", 0, channel->getName());
 		_user.addChannel(channel);
 	}
-	// _user.messageUser(":" + _user.getNick() + " JOIN " + channel->getName());
 	channel->messageChannel(":" + _user.getNick() + " JOIN " + channel->getName());
 	std::list<User *> users = channel->getUsers();
 	std::string res;
