@@ -10,7 +10,7 @@ void shutdown(int sig)
 
 int main(int argc, char **argv)
 {
-	signal (SIGINT, shutdown);
+	signal(SIGINT, shutdown);
 	try
 	{
 		if (argc != 3)
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		Server server(HOST, argv[1], argv[2]);
 		server.init();
 	}
-	catch (const std::exception& e)
+	catch (const std::exception &e)
 	{
 		std::cout << e.what() << std::endl;
 		return (1);

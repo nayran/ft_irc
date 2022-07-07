@@ -10,6 +10,8 @@ Command::~Command(){};
 
 void Command::parse(std::string buff)
 {
+	if (buff[0] == '/')
+		buff.erase(0, 1);
 	buff.erase(std::remove(buff.begin(), buff.end(), '\n'), buff.end());
 	buff.erase(std::remove(buff.begin(), buff.end(), '\r'), buff.end());
 
@@ -41,6 +43,8 @@ void Command::run()
 		return;
 	else if (_command == "PASS")
 		ft_pass();
+	else if (_command == "QUIT")
+		ft_quit();
 	else if (_user.isAuth())
 	{
 		if (_command == "NICK")
@@ -67,8 +71,6 @@ void Command::run()
 					ft_mode();
 				else if (_command == "WHO")
 					ft_who();
-				else if (_command == "QUIT")
-					ft_quit();
 				else
 					numericResponse(_command + " :Unknown command", "421");
 			}

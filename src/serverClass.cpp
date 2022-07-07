@@ -139,14 +139,11 @@ void Server::init2()
 				break;
 			}
 			else
-			{
 				receiveMessage(thisPollFd.fd);
-			}
 		}
-		if ((thisPollFd.revents & POLLHUP) == POLLHUP)
+		if (thisPollFd.revents == POLLHUP)
 		{
-			std::cout << "pollhup" << std::endl
-					  << std::flush;
+			std::cout << "pollhup" << std::endl;
 			break;
 		}
 	}
@@ -158,20 +155,23 @@ int Server::receiveMessage(int clifd)
 	std::string buffaux;
 	memset(buff, '\0', 512);
 	size_t nbytes;
+	int a = 0;
 	while (buffaux.find("\r\n"))
 	{
 		if ((nbytes = recv(clifd, buff, 1, 0)) < 0)
 			throw std::runtime_error("RECV ERROR");
 		else
 		{
-			// std::cout << "buff: " << buff << std::endl;
 			buffaux += buff;
+			if (a > 500)
+				buffaux = "/QUIT you can't flood this server\r\n";
 			if (buffaux.find("\r\n") != std::string::npos)
 			{
 				Command cmd(buffaux, clifd, *this);
 				break;
 			}
 		}
+		a++;
 	}
 	buffaux.clear();
 	delete[] buff;
