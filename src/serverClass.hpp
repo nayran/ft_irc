@@ -28,7 +28,7 @@ public:
 	std::list<User *> getUsers();
 	void messageAll(std::string ack);
 	void messageAllBut(std::string ack, int socket);
-	void deleteUser(User *user);
+	void deleteUser(int socket);
 	Channel *getChannelByName(std::string name);
 	std::list<Channel *> getChannels();
 	void addChannel(Channel *channel);

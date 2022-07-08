@@ -134,7 +134,7 @@ void Command::ft_quit()
 		message += *it + " ";
 	}
 	_server.messageAll(":" + _user.getNick() + " QUIT :" + message);
-	_server.deleteUser(&_user);
+	_server.deleteUser(_user.getSocket());
 }
 
 void Command::ft_who()
@@ -395,20 +395,6 @@ void Command::ft_user()
 	send(_user.getSocket(), ack.c_str(), strlen(ack.c_str()), 0);
 	numericResponse("Welcome to Nayran's ft_irc " + _user.getNick(), "001");
 }
-
-// void Command::ft_quit()
-// {
-// 	std::string ack = "Quit";
-// 	if (_options.size() > 0)
-// 	{
-// 		ack += ": ";
-// 		for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); it++)
-// 			ack += *it + " ";
-// 	}
-// 	std::cout << ack << std::endl;
-// 	// _server.deleteUser(&this->_user);
-// 	// _server.serverResponse(ack);
-// }
 
 void Command::ft_oper()
 {

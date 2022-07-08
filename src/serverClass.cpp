@@ -136,6 +136,7 @@ void Server::init2()
 	for (std::vector<pollfd>::iterator it = _fdvec.begin(); it != _fdvec.end(); it++)
 	{
 		thisPollFd = *it;
+		std::cout << "accept: " << thisPollFd.fd << std::endl;
 		if ((thisPollFd.revents & POLLIN) == POLLIN)
 		{
 			if (thisPollFd.fd == _socket)
@@ -146,7 +147,7 @@ void Server::init2()
 			else
 				receiveMessage(thisPollFd.fd);
 		}
-		if (thisPollFd.revents == POLLHUP)
+		else if (thisPollFd.revents == POLLHUP)
 		{
 			std::cout << "pollhup" << std::endl;
 			break;
@@ -156,13 +157,15 @@ void Server::init2()
 
 int Server::receiveMessage(int clifd)
 {
-	char *buff = new char[512];
+	char buff[512];
 	std::string buffaux;
 	memset(buff, '\0', 512);
 	int a = 0;
 	while (buffaux.find("\r\n"))
 	{
-		if (recv(clifd, buff, 1, 0) < 0)
+		int nbytes;
+		nbytes = recv(clifd, buff, 1, 0);
+		if (nbytes < 0)
 			throw std::runtime_error("RECV ERROR");
 		else
 		{
@@ -178,7 +181,6 @@ int Server::receiveMessage(int clifd)
 		a++;
 	}
 	buffaux.clear();
-	delete[] buff;
 	return 0;
 }
 
@@ -241,19 +243,20 @@ std::list<User *> Server::getUsers()
 	return (_users);
 }
 
-void Server::deleteUser(User *user)
+void Server::deleteUser(int socket)
 {
 	std::list<User *>::iterator it;
 	for (it = _users.begin(); it != _users.end(); ++it)
 	{
-		if (*it == user)
+		if ((*it)->getSocket() == socket)
 		{
+			delete *it;
 			_users.erase(it);
-			// delete *it;
 			break;
 		}
 	}
-	close(user->getSocket());
+	std::cout << "del: " << socket << std::endl;
+	close(socket);
 }
 
 Channel *Server::getChannelByName(std::string name)
