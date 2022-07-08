@@ -8,6 +8,8 @@
 #include <poll.h>
 #include "channelClass.hpp"
 
+extern int running;
+
 class User;
 class Command;
 

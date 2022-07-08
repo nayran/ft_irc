@@ -2,10 +2,12 @@
 #include "serverClass.hpp"
 #include <csignal>
 
+int running = true;
+
 void shutdown(int sig)
 {
-	std::cout << "Server shutting down..." << std::endl;
-	exit(sig);
+	std::cout << "Server shutting down..." << sig << std::endl;
+	running = false;
 }
 
 int main(int argc, char **argv)
