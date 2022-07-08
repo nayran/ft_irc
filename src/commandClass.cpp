@@ -83,6 +83,8 @@ void Command::run()
 					ft_mode();
 				else if (_command == "WHO")
 					ft_who();
+				else if (_command == "NOTICE")
+					ft_notice();
 				else
 					numericResponse(_command + " :Unknown command", "421");
 			}
@@ -94,6 +96,27 @@ void Command::run()
 	}
 	else
 		return numericResponse("provide a password: /PASS <password>", "464");
+}
+
+void Command::ft_notice()
+{
+	if (_options.size() == 0 || _options[0].empty())
+		return;
+	if (_options.size() == 1 || _options[1].empty())
+		return;
+	User sender = _user;
+	User *receiver = _server.getUserByNick(_options[0]);
+	if (!receiver)
+		return;
+	std::string message;
+	for (std::vector<std::string>::iterator it = _options.begin() + 1; it != _options.end(); it++)
+	{
+		message += *it + " ";
+	}
+	if (message[0] == ':')
+		message.erase(0, 1);
+	std::string res = ":" + sender.getNick() + " PRIVMSG " + receiver->getNick() + " :" + message;
+	receiver->messageUser(res);
 }
 
 void Command::ft_help()

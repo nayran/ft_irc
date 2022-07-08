@@ -37,6 +37,7 @@ private:
 	void ft_who();
 	void ft_quit();
 	void ft_help();
+	void ft_notice();
 
 	void parse(std::string buff);
 	void run();
