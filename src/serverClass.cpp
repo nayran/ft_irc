@@ -136,20 +136,17 @@ void Server::init2()
 	for (std::vector<pollfd>::iterator it = _fdvec.begin(); it != _fdvec.end(); it++)
 	{
 		thisPollFd = *it;
-		std::cout << "accept: " << thisPollFd.fd << std::endl;
+		if (thisPollFd.revents == POLLHUP)
+		{
+			std::cout << "pollhup" << std::endl << std::flush;
+			break;
+		}
 		if ((thisPollFd.revents & POLLIN) == POLLIN)
 		{
 			if (thisPollFd.fd == _socket)
-			{
 				this->acceptUser();
-				break;
-			}
 			else
 				receiveMessage(thisPollFd.fd);
-		}
-		else if (thisPollFd.revents == POLLHUP)
-		{
-			std::cout << "pollhup" << std::endl;
 			break;
 		}
 	}
@@ -245,8 +242,18 @@ std::list<User *> Server::getUsers()
 
 void Server::deleteUser(int socket)
 {
-	std::list<User *>::iterator it;
-	for (it = _users.begin(); it != _users.end(); ++it)
+
+	std::cout << "DELETE"  <<std::endl << std::flush;
+	for (std::vector<pollfd>::iterator it = _fdvec.begin(); it != _fdvec.end(); ++it)
+	{
+		if ((*it).fd == socket)
+		{
+			close(socket);
+			_fdvec.erase(it);
+			break;
+		}
+	}
+	for (std::list<User *>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
 		if ((*it)->getSocket() == socket)
 		{
@@ -255,8 +262,6 @@ void Server::deleteUser(int socket)
 			break;
 		}
 	}
-	std::cout << "del: " << socket << std::endl;
-	close(socket);
 }
 
 Channel *Server::getChannelByName(std::string name)
