@@ -13,8 +13,7 @@ FLAGS = -Wall -Werror -Wextra -std=c++98
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	@c++ $(FLAGS) $(OBJS) -o $(NAME)
-	./ircserv 6667 asd
+	c++ $(FLAGS) $(OBJS) -o $(NAME)
 
 %.o: %.cpp
 	@c++ -c $(FLAGS) $< -o $@
