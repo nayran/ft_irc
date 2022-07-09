@@ -250,13 +250,13 @@ void Command::ft_names()
 {
 	if (_options.size() < 1 || _options[0].empty())
 	{
-		if (_options[0].empty())
-			_options.erase(_options.begin());
 		std::list<Channel *> channels = _server.getChannels();
 		for (std::list<Channel *>::iterator it = channels.begin(); it != channels.end(); it++)
 		{
 			_options.push_back((*it)->getName());
 		}
+		if (_options.begin() == _options.end())
+			numericResponse("End of /NAMES list", "366", 0);
 	}
 	for (std::vector<std::string>::iterator it = _options.begin(); it != _options.end(); ++it)
 	{
