@@ -142,7 +142,8 @@ void Server::init2()
 		thisPollFd = *it;
 		if (thisPollFd.revents == POLLHUP)
 		{
-			std::cout << "pollhup" << std::endl << std::flush;
+			std::cout << "pollhup" << std::endl
+					  << std::flush;
 			break;
 		}
 		if ((thisPollFd.revents & POLLIN) == POLLIN)
@@ -166,7 +167,7 @@ int Server::receiveMessage(int clifd)
 		int nbytes;
 		nbytes = recv(clifd, &buff, 1, 0);
 		if (nbytes < 0)
-			continue ;
+			continue;
 		else
 		{
 			buffaux += buff;
@@ -246,6 +247,8 @@ std::list<User *> Server::getUsers()
 
 void Server::deleteUser(int socket)
 {
+	for (std::list<Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		(*it)->deleteUser(getUserBySocket(socket));
 	for (std::vector<pollfd>::iterator it = _fdvec.begin(); it != _fdvec.end(); ++it)
 	{
 		if ((*it).fd == socket)
