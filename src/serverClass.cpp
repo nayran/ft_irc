@@ -161,19 +161,20 @@ int Server::receiveMessage(int clifd)
 	char buff = '\0';
 	std::string buffaux;
 	int a = 0;
-	while (buffaux.find("\r\n"))
+	while (buffaux.find("\n"))
 	{
 		int nbytes;
 		nbytes = recv(clifd, &buff, 1, 0);
 		if (nbytes < 0)
-			throw std::runtime_error("RECV ERROR");
+			continue ;
 		else
 		{
 			buffaux += buff;
 			if (a > 500)
 				buffaux = "/QUIT you can't flood this server\r\n";
-			if (buffaux.find("\r\n") != std::string::npos)
+			if (buffaux.find("\n") != std::string::npos)
 			{
+				std::cout << buffaux << std::endl;
 				Command cmd(buffaux, clifd, *this);
 				break;
 			}
