@@ -175,7 +175,6 @@ int Server::receiveMessage(int clifd)
 				buffaux = "/QUIT you can't flood this server\r\n";
 			if (buffaux.find("\n") != std::string::npos)
 			{
-				std::cout << buffaux << std::endl;
 				Command cmd(buffaux, clifd, *this);
 				break;
 			}
