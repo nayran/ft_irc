@@ -14,6 +14,7 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	c++ $(FLAGS) $(OBJS) -o $(NAME)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./ircserv 6667 asd
 
 %.o: %.cpp
 	@c++ -c $(FLAGS) $< -o $@

@@ -127,7 +127,7 @@ void Server::init()
 	while (running)
 	{
 		itfd = _fdvec.begin();
-		if (poll(&(*itfd), _fdvec.size(), -1) == -1)
+		if (poll(&(*itfd), _fdvec.size(), 5000) == -1)
 			throw std::runtime_error("error: could not poll");
 		this->init2();
 	}
@@ -301,7 +301,6 @@ void Server::messageAll(std::string message)
 		if (send((*it)->getSocket(), message.c_str(), strlen(message.c_str()), 0) == -1)
 			throw std::runtime_error("Couldn't SEND messageAll");
 	}
-	// std::cout << "SERVER MSG: " << ack << std::endl;
 }
 
 void Server::messageAllBut(std::string message, int socket)
