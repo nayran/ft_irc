@@ -25,7 +25,6 @@ private:
     std::list<User *> _users;
     std::string _password;
     std::string _topic;
-    // Server *_server;
 };
 
 #include "serverClass.hpp"

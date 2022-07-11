@@ -376,10 +376,7 @@ void Command::ft_nick()
 		if ((*it)->getNick() == newNick)
 			return numericResponse("Nick already in use!", "433");
 	}
-	// if (_user.getNick() != "")
 	_server.messageAll(":" + _user.getNick() + " NICK " + newNick);
-	// else
-	// 	_server.messageAll(":127.0.0.1 001 all :" + newNick + " joined the server");
 	_user.setNick(newNick);
 }
 
@@ -440,7 +437,6 @@ void Command::numericResponse(std::string message, std::string resnum, int socke
 	res += message + "\r\n";
 	if (!socket)
 		socket = _user.getSocket();
-	// std::cout << res << std::endl;
 	if (send(socket, res.c_str(), strlen(res.c_str()), 0) == -1)
 		throw std::runtime_error("Couldn't SEND socket");
 }
